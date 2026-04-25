@@ -1,0 +1,4 @@
+set(__QT_DEPLOY_TARGET_OpenXLSX_FILE C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u041eu0442u043bu0430u0434u043au0430/Backend/OpenXLSX/libOpenXLSXd.a)
+set(__QT_DEPLOY_TARGET_OpenXLSX_TYPE STATIC_LIBRARY)
+set(__QT_DEPLOY_TARGET_Vega_FILE C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u041eu0442u043bu0430u0434u043au0430/Vega.js)
+set(__QT_DEPLOY_TARGET_Vega_TYPE EXECUTABLE)

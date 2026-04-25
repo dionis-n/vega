@@ -1,0 +1,41 @@
+OpenXLSX_autogen/timestamp: \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/BasicConfigVersion-AnyNewerVersion.cmake.in \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/CMakePackageConfigHelpers.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/CheckCCompilerFlag.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/CheckCXXCompilerFlag.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/CheckCompilerFlag.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/CheckSourceCompiles.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/GNUInstallDirs.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/GenerateExportHeader.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/Internal/CheckCompilerFlag.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/WriteBasicConfigVersionFile.cmake \
+	C:/Program\ Files/CMake/share/cmake-3.29/Modules/exportheader.cmake.in \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/CMakeLists.txt \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/OpenXLSXConfig.cmake \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLCell.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLCellIterator.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLCellRange.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLCellReference.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLCellValue.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLColor.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLColumn.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLContentTypes.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLDateTime.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLDocument.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLFormula.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLProperties.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLRelationships.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLRow.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLRowData.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLSharedStrings.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLSheet.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLWorkbook.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLXmlData.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLXmlFile.cpp \
+	C:/Users/ADMIN/Documents/vega/src/Backend/OpenXLSX/sources/XLZipArchive.cpp \
+	C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u041eu0442u043bu0430u0434u043au0430/.qtcreator/cmake-helper/package-manager.cmake \
+	C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u041eu0442u043bu0430u0434u043au0430/.qtcreator/cmake-helper/qtcreator-project.cmake \
+	C:/Program\ Files/CMake/bin/cmake.exe

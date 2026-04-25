@@ -1,6 +1,6 @@
 scheduleLabel 
 {
-    background-color: black;
+    background-color: #1d1d1c;
     border-radius: 20px;
     border-style: outset;
     padding: 5px;
@@ -11,7 +11,7 @@ scheduleLabel
 
 dayButton 
 {
-    background-color: black;
+    background-color: #1d1d1c;
     color: white;
     border-radius: 25px;
     border-style: outset;
