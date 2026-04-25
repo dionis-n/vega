@@ -8,12 +8,13 @@
 #include <QString>
 #include <QStringList>
 #include <QDateTime>
+#include <QStandardPaths>
+#include <QFileDialog>
 
 enum
 {
     COUNT_MAX_VISIBLE_ITEMS = 5
 };
-
 
 class SettingsTab : public QWidget
 {
@@ -39,7 +40,9 @@ private slots:
     void slotSubgroup(int index);
     void slotWeek(int index);
     void slotShowEmptyLessons(int index);
-};
+    void onThemeChanged(int index);
 
+    void onLoadFileClicked();
+};
 
 #endif //VEGA_SETTINGSTAB_H

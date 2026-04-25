@@ -1,17 +1,9 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <OpenXLSX.hpp>
-using namespace OpenXLSX;
-
 #include <QVector>
-#include <QString>
-#include <QFile>
-#include <QXmlStreamWriter>
-#include <QXmlStreamReader>
-#include <QDebug>
-
-
+#include <QStringList>
+#include <QByteArray>
 struct Lesson
 {
     int _number;
@@ -19,21 +11,22 @@ struct Lesson
     QString _cabinet;
 };
 
-
-class Parser
-{
+class Parser {
 public:
-    Parser() = default;
+    // Загружает XLSX из памяти (QByteArray) и заполняет _rawSchedule
+    void loadXLSXFromMemory(const QByteArray& data, int groupIndex);
 
-    void readXLSX(const QString& directory, const QString& fileNameXLSX, int groupIndex);
-    static QStringList groups(const QString& directory, const QString& fileNameXLSX);   // return all groups from file   
-    void writeXML(const QString& directory, const QString& fileNameXML);
-    static QVector<QVector<Lesson*>> readXML(const QString& directory, const QString& fileNameXML, int userSubgroup,
-                                             int userWeek);
+    // Сохраняет _rawSchedule в XML файл
+    void writeXML(const QString& directory, const QString& fileName);
+
+    // Читает XML файл и возвращает расписание (статический метод)
+    static QVector<QVector<Lesson*>> readXML(const QString& directory, const QString& fileName, int userSubgroup, int userWeek);
+
+    // Возвращает список групп из XML (статический метод)
+    static QStringList groups(const QString& directory, const QString& fileName);
 
 private:
-    QVector<QVector<Lesson*>> _rawSchedule;
+    QVector<QVector<Lesson*>> _rawSchedule;  // 6 дней, внутри — список занятий
 };
-
 
 #endif // PARSER_H

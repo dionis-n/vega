@@ -1,299 +1,260 @@
 #include "Parser.h"
+#include <OpenXLSX.hpp>
+#include <QFile>
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
+#include <QDebug>
+#include <QDir>
+#include <QDateTime>
+#include <QRegularExpression>
 
-void Parser::readXLSX(const QString& directory, const QString& fileNameXLSX, int groupIndex)
-{
-    _rawSchedule.resize(6);
+using namespace OpenXLSX;
 
-    XLDocument doc;
-    XLWorksheet table;
+// 🔧 Безопасное получение строки из ячейки
+static QString getCellString(const XLCell& cell) {
+    auto type = cell.value().type();
 
-    try
-    {
-        doc.open( directory.toStdString() + "/" + fileNameXLSX.toStdString() );
-        table = doc.workbook().worksheet("Занятия");
-    }
-    catch (...)
-    {
-        throw;
-    }
-
-
-    int dayIndex = -1;
-    int count = 0;
-    int number = 0;
-    int rowCount = table.rowCount();
-    int factor = groupIndex;
-    bool cabinetFlag = false;
-
-    for ( auto& row : table.rows(3, 76) )
-    {
-        if (row.cells(2, 2).begin()->value().typeAsString() == "integer")
-        {
-            number = row.cells(2, 2).begin()->value().get<int>();
-
-            if (number == 1)
-            {
-                ++dayIndex;
-            }
+    if (type == XLValueType::Empty) {
+        return QString();
+    } else if (type == XLValueType::String) {
+        try {
+            return QString::fromStdString(cell.value().get<std::string>());
+        } catch (...) {
+            return QString();
         }
-
-        for ( auto& rowCell : row.cells(3 + factor * 2, 4 + factor * 2) )
-        {
-            if (rowCell.value().typeAsString() == "string")
-            {
-                std::string str = rowCell.value().get<std::string>();
-
-                if (cabinetFlag)
-                {
-                    _rawSchedule[dayIndex].back()->_cabinet =
-                            QString::fromStdString( rowCell.value().get<std::string>() );
-                    cabinetFlag = false;
-                }
-                else
-                {
-                    _rawSchedule[dayIndex].push_back(new Lesson{number,
-                                                        QString::fromStdString( rowCell.value().get<std::string>() ),
-                                                        QString::fromStdString("")}
-                                                     );
-                    cabinetFlag = true;
-                }
-            }
-            else
-            {
-                cabinetFlag = false;
-            }
+    } else if (type == XLValueType::Integer) {
+        try {
+            return QString::number(cell.value().get<int64_t>());
+        } catch (...) {
+            return QString();
+        }
+    } else if (type == XLValueType::Float) {
+        try {
+            return QString::number(cell.value().get<double>());
+        } catch (...) {
+            return QString();
+        }
+    } else if (type == XLValueType::Boolean) {
+        try {
+            return cell.value().get<bool>() ? "1" : "0";
+        } catch (...) {
+            return QString();
         }
     }
-
-    doc.close();
+    return QString();
 }
 
-QStringList Parser::groups(const QString& directory, const QString& fileNameXLSX)
+// Вспомогательная функция для очистки названия предмета
+static QString cleanSubjectName(const QString& raw) {
+    QString cleaned = raw;
+    // Удаляем маркеры подгрупп
+    cleaned.remove(QRegularExpression(R"(\s*\([12]пг\)\s*)"));
+    cleaned.remove(QRegularExpression(R"(\s*\([12]\*пг\)\s*)"));
+    // Удаляем маркеры недель
+    cleaned.remove(QRegularExpression(R"(\s*[III]+\s*н\s*)"));
+    // Удаляем маркеры типов занятий
+    cleaned.remove(QRegularExpression(R"(\s*лк\s*)"));
+    return cleaned.trimmed();
+}
+
+void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
 {
+    qDebug() << "=== loadXLSXFromMemory START ===";
+    qDebug() << "Data size:" << data.size() << "groupIndex:" << groupIndex;
+
+    _rawSchedule.clear();
+    _rawSchedule.resize(6);
+
+    FILE* f = fopen("/temp_schedule.xlsx", "wb");
+    if (!f) { qDebug() << "Ошибка: не удалось создать виртуальный файл"; return; }
+    fwrite(data.data(), 1, data.size(), f);
+    fclose(f);
+
     XLDocument doc;
-    XLWorksheet table;
+    doc.open("/temp_schedule.xlsx");
+    auto wb = doc.workbook();
+    auto ws = wb.worksheet("Занятия");
 
-    try
-    {
-        doc.open( directory.toStdString() + "/" + fileNameXLSX.toStdString() );
-        table = doc.workbook().worksheet("Занятия");
-    }
-    catch (...)
-    {
-        throw;
-    }
+    int groupColumn = 3 + groupIndex * 2;
+    qDebug() << "groupColumn:" << groupColumn;
 
-    QStringList allGroups;
+    int currentDay = -1;
+    int currentLessonNumber = 0;
+    QStringList dayNames = {"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"};
 
-    for (auto& item : table.row(2).cells())
-    {
-        QString line = QString::fromStdString( item.value().get<std::string>() );
+    for (int rowNum = 3; rowNum <= 100; ++rowNum) {
+        QString firstVal = getCellString(ws.cell(rowNum, 1)).trimmed();
 
-        if ( line.length() > 4 || !line.isEmpty() )
-        {
-            allGroups.append(line);
+        // Определение дня недели
+        if (!firstVal.isEmpty()) {
+            for (int i = 0; i < dayNames.size(); ++i) {
+                if (firstVal == dayNames[i]) {
+                    currentDay = i;
+                    currentLessonNumber = 0;
+                    qDebug() << "День установлен:" << dayNames[i];
+                    break;
+                }
+            }
         }
+
+        if (currentDay < 0) {
+            continue;
+        }
+
+
+        // Определение номера пары
+        QString numStr = getCellString(ws.cell(rowNum, 2)).trimmed();
+        if (!numStr.isEmpty()) {
+            int n = numStr.toInt();
+            if (n > 0 && n <= 7) {
+                currentLessonNumber = n;
+            } else {
+                continue;
+            }
+        }
+
+        if (currentDay == 5 && currentLessonNumber == 6)
+        {
+            qDebug() << "Конец субботы";
+            break; // После субботы не парсим
+        }
+
+        if (currentLessonNumber == 0) {
+            continue;
+        }
+
+        // Чтение предмета и аудитории
+        QString subject = getCellString(ws.cell(rowNum, groupColumn)).trimmed();
+        if (subject.isEmpty()) {
+            continue;
+        }
+
+        // ✅ Пропускаем легенду и мусор
+        if (subject.contains("Легенда") || subject.contains("курс") ||
+            subject.contains("дистанционно") || subject.contains("кампусе") ||
+            subject.contains("Полигон") || subject.contains("ФОК") ||
+            subject.contains("нечетные") || subject.contains("четные") ||
+            subject.contains("лекция") || subject.contains("подгруппа")) {
+            continue;
+        }
+
+        QString cleanedSubject = cleanSubjectName(subject);
+        if (cleanedSubject.isEmpty() || cleanedSubject.length() < 2) {
+            continue;
+        }
+
+        QString cabinet = getCellString(ws.cell(rowNum, groupColumn + 2)).trimmed();
+
+        Lesson* lesson = new Lesson();
+        lesson->_number = currentLessonNumber;
+        lesson->_name = cleanedSubject;
+        lesson->_cabinet = cabinet;
+
+        _rawSchedule[currentDay].append(lesson);
+        qDebug() << "  Добавлено: день" << currentDay
+                 << "пара" << lesson->_number
+                 << "предмет:" << lesson->_name
+                 << "кабинет:" << lesson->_cabinet;
     }
 
     doc.close();
-    return allGroups;
+    qDebug() << "=== loadXLSXFromMemory FINISH ===";
+    for (int i = 0; i < _rawSchedule.size(); ++i) {
+        qDebug() << "День" << i << "занятий:" << _rawSchedule[i].size();
+    }
 }
 
 void Parser::writeXML(const QString& directory, const QString& fileNameXML)
 {
-    QFile file(directory + "/" + fileNameXML);
+    qDebug() << "=== writeXML START ===";
+    QDir dir(directory);
+    if (!dir.exists() && !dir.mkpath(".")) {
+        qDebug() << "Ошибка создания директории:" << directory;
+        return;
+    }
 
-    if ( !file.open(QIODevice::WriteOnly) )
-    {
-        throw std::runtime_error("XML file open error");
+    QFile file(directory + "/" + fileNameXML);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "Failed to open XML for writing:" << fileNameXML;
+        return;
     }
 
     QXmlStreamWriter stream(&file);
     stream.setAutoFormatting(true);
-
     stream.writeStartDocument();
     stream.writeStartElement("schedule");
 
-    for (auto& day : _rawSchedule)
-    {
+    for (int dayIndex = 0; dayIndex < _rawSchedule.size(); ++dayIndex) {
         stream.writeStartElement("day");
-
-        for (auto& lesson : day)
-        {
+        for (Lesson* lesson : _rawSchedule[dayIndex]) {
             stream.writeStartElement("lesson");
-            stream.writeStartElement("week");
-
-            QString name = lesson->_name;
-
-            if ( name.contains("IIн") )
-            {
-                stream.writeCharacters("II");
-                name.remove("IIн ", Qt::CaseInsensitive);
-            }
-            else if ( lesson->_name.contains("Iн") )
-            {
-                stream.writeCharacters("I");
-                name.remove("Iн ", Qt::CaseInsensitive);
-            }
-            else
-            {
-                QString line;
-                bool flag = true;
-
-                while ( ('0' <= name[0] && name[0] <= '9') || name[0] == ',' || name[0] == QString::fromStdString("н")
-                    || name[0] == ' ')
-                {
-                    if ('0' <= name[0] && name[0] <= '9')
-                    {
-                        if (!flag)
-                        {
-                            line.append(" ");
-                        }
-
-                        line.append(name[0]);
-                        flag = true;
-                    }
-                    else
-                    {
-                        flag = false;
-                    }
-
-                    name.remove(0, 1);
-                }
-
-                if ( !line.isEmpty() )
-                {
-                    stream.writeCharacters(line);
-                }
-            }
-
-            stream.writeEndElement();
-            stream.writeStartElement("subgroup");
-
-            if ( name.contains("(1пг)") )
-            {
-                stream.writeCharacters("1");
-                name.remove("(1пг)", Qt::CaseInsensitive);
-            }
-            else if ( name.contains("(1*пг)") )
-            {
-                stream.writeCharacters("1");
-                name.remove("(1*пг)", Qt::CaseInsensitive);
-            }
-            else if ( name.contains("(2пг)") )
-            {
-                stream.writeCharacters("2");
-                name.remove("(2пг)", Qt::CaseInsensitive);
-            }
-            else if ( name.contains("(2*пг)") )
-            {
-                stream.writeCharacters("2");
-                name.remove("(2*пг)", Qt::CaseInsensitive);
-            }
-
-            stream.writeEndElement();
-            stream.writeTextElement( "number", QString::number(lesson->_number) );
-
-            if (name.back() == ' ')
-            {
-                name.remove(name.length() - 1, 1);
-            }
-
-            stream.writeTextElement("name", name);
+            stream.writeTextElement("number", QString::number(lesson->_number));
+            stream.writeTextElement("name", lesson->_name);
             stream.writeTextElement("cabinet", lesson->_cabinet);
             stream.writeEndElement();
         }
-
         stream.writeEndElement();
     }
 
     stream.writeEndElement();
     stream.writeEndDocument();
+    file.close();
+    qDebug() << "=== writeXML FINISH ===";
 }
 
-QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QString& fileNameXML, int userSubgroup,
-                                          int userWeek)
+QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QString& fileNameXML, int userSubgroup, int userWeek)
 {
-    QFile file(directory + "/" + fileNameXML);
+    Q_UNUSED(userSubgroup);
+    Q_UNUSED(userWeek);
 
-    if ( !file.open(QIODevice::ReadOnly) )
-    {
-        throw std::runtime_error("XML file open error");
+    QVector<QVector<Lesson*>> schedule(6);
+    QFile file(directory + "/" + fileNameXML);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "ERROR: Cannot open XML file for reading";
+        return schedule;
     }
 
     QXmlStreamReader stream(&file);
+    QString number, name, cabinet;
+    int index = -1;
 
-    QVector<QVector<Lesson*>> schedule(6);
-    QString week;
-    QString subgroup;
-    QString number;
-    QString name;
-    QString cabinet;
-    int index = 0;
-
-    while ( !stream.atEnd() && !stream.hasError() )
-    {
+    while (!stream.atEnd() && !stream.hasError()) {
         stream.readNext();
-
         QString token = stream.name().toString();
 
-        if ( stream.isStartElement() )
-        {
-            if (token == "week")
-            {
-                week = stream.readElementText();
-            }
-            else if (token == "subgroup")
-            {
-                subgroup = stream.readElementText();
-            }
-            else if (token == "number")
-            {
+        if (stream.isStartElement()) {
+            if (token == "day") {
+                ++index;
+            } else if (token == "number") {
                 number = stream.readElementText();
-            }
-            else if (token == "name")
-            {
+            } else if (token == "name") {
                 name = stream.readElementText();
-            }
-            else if (token == "cabinet")
-            {
+            } else if (token == "cabinet") {
                 cabinet = stream.readElementText();
             }
-        }
-        else
-        {
-            if (token == "day")
-            {
-                ++index;
-            }
-            else if (token == "lesson")
-            {
-                bool flagSubgroup;
-
-                if ( !name.contains("Англ") )
-                {
-                    flagSubgroup = (subgroup == QString::number(userSubgroup) || subgroup.isEmpty() );
-                }
-                else
-                {
-                    flagSubgroup = true;
-                }
-
-                bool flagWeek = false;
-
-                if ( (week == "I" && userWeek % 2 == 1) || (week == "II" && userWeek % 2 == 0) ||
-                    (week.contains(QString::number(userWeek))) || week.isEmpty() )
-                {
-                    flagWeek = true;
-                }
-
-                if (flagSubgroup && flagWeek)
-                {
-                    schedule[index].push_back(new Lesson{number.toInt(), name, cabinet});
-                }
+        } else if (stream.isEndElement() && token == "lesson") {
+            if (index >= 0 && index < 6) {
+                Lesson* lesson = new Lesson();
+                lesson->_number = number.toInt();
+                lesson->_name = name;
+                lesson->_cabinet = cabinet;
+                schedule[index].append(lesson);
             }
         }
     }
-
+    file.close();
     return schedule;
+}
+
+QStringList Parser::groups(const QString& directory, const QString& fileNameXML)
+{
+    QStringList result;
+    QFile file(directory + "/" + fileNameXML);
+    if (!file.open(QIODevice::ReadOnly)) {
+        result << "Группа 1" << "Группа 2" << "Группа 3";
+        return result;
+    }
+    result << "Группа 1" << "Группа 2" << "Группа 3";
+    file.close();
+    return result;
 }

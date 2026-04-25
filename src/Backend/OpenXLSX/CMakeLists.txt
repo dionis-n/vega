@@ -119,7 +119,8 @@ endif()
 #   Define the static library
 #=======================================================================================================================
 if (${OPENXLSX_LIBRARY_TYPE} STREQUAL "STATIC")
-    add_library(OpenXLSX STATIC "")
+    add_library(OpenXLSX STATIC ""
+    )
     add_library(OpenXLSX::OpenXLSX ALIAS OpenXLSX)
     target_sources(OpenXLSX PRIVATE ${OPENXLSX_SOURCES})
     target_include_directories(OpenXLSX

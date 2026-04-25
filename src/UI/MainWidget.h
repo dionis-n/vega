@@ -6,12 +6,12 @@
 #include "CustomElements.h"
 #include "CommonFunctions.h"
 #include "Backend/Parser.h"
-#include "Backend/Downloader.h"
 
 #include <QStandardPaths>
 #include <QApplication>
 #include <QSettings>
 #include <QTimer>
+#include <QPushButton>
 
 enum
 {
@@ -22,11 +22,14 @@ enum
     LIGHT_THEME,
     DARK_THEME,
 
+    THEME_SYSTEM = 0,
+    THEME_LIGHT = 1,
+    THEME_DARK = 2,
+
     MAX_WEEK_NUMBER = 20,
 
     EXTRA_SIZE = 120
 };
-
 
 class MainWidget : public QWidget
 {
@@ -36,31 +39,39 @@ public:
     explicit MainWidget(QWidget* parent = nullptr);
     ~MainWidget();
 
+    void setTheme(int themeIndex);
+    int getCurrentTheme() const { return _currentTheme; }
+
+    int getGroupIndex() const { return _groupIndex; }
+    QString getStandardPath() const { return _standardPath; }
+    void switchToSchedule();
+
 private:
-    QHBoxLayout* createTabBarLayout();      // bottom buttons
-    void appConfig();                       // load settings and check app directory
+    QHBoxLayout* createTabBarLayout();
+    void appConfig();
     void saveSettingsFromTab();
     void calulateCurrentWeekNumber();
+    void applyTheme();
 
     QVBoxLayout* _mainLayout;
 
     int _currentTabIndex;
     int _appTheme = START_UP_THEME;
+    int _currentTheme = THEME_SYSTEM;
     QTimer* _timer;
     bool _showEmptyLessons;
 
     QSettings _settings;
-    QString _standardPath;      // app directory
-    QString _url;               // url for download schedule
+    QString _standardPath;
     int _groupIndex;
     int _subgroup;
 
-    QDate _date;                // when user change week in settings
-    int _week;                  // what week select user when last change
-    int _currentWeekNumber;     // calculated using _date and _week
+    QDate _date;
+    int _week;
+    int _currentWeekNumber;
 
-    QString _fileNameXLSX = "Schedule.xlsx";    // downloaded from vega
-    QString _fileNameXML = "Data.xml";          // created after parsing .xlsx
+    QString _fileNameXLSX = "Schedule.xlsx";
+    QString _fileNameXML = "Data.xml";
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -68,8 +79,7 @@ protected:
 private slots:
     void slotScheduleButtonClicked();
     void slotSettingsButtonClicked();
-    void slotCheckSystemTheme();        // check background color of application
+    void slotCheckSystemTheme();
 };
-
 
 #endif // MAINWIDGET_H

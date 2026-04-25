@@ -37,6 +37,7 @@ private:
     QVBoxLayout* createNarrowLayout();       // vertical position of the phone or monitor
     QString getFormatText(Lesson* lesson);   // return html text
     int getWeekdayNumber();
+    void onThemeButtonClicked(); //изменение темы
 
     QVBoxLayout* _scheduleTabLayout;
 
