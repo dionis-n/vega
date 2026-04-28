@@ -52,6 +52,7 @@ private:
     void saveSettingsFromTab();
     void calulateCurrentWeekNumber();
     void applyTheme();
+    void updateTabBarButtons();
 
     QVBoxLayout* _mainLayout;
 
@@ -72,6 +73,9 @@ private:
 
     QString _fileNameXLSX = "Schedule.xlsx";
     QString _fileNameXML = "Data.xml";
+
+    scheduleButton* _scheduleBtn = nullptr;
+    settingsButton* _settingsBtn = nullptr;
 
 protected:
     void closeEvent(QCloseEvent* event) override;

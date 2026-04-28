@@ -162,7 +162,7 @@ QString ScheduleTab::getFormatText(Lesson* lesson)
     }
     else
     {
-        time = _lessonTime[lesson->_number - 1] + "   ";
+        time = _lessonTime[lesson->_number - 1] + "  ";
     }
 
     return QString("<table width=\"100%\">\
