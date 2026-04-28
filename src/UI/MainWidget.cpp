@@ -56,27 +56,39 @@ QHBoxLayout* MainWidget::createTabBarLayout()
 {
     QHBoxLayout* tabBarLayout = new QHBoxLayout();
 
-    scheduleButton* schedule = new scheduleButton();
-    connect(schedule, SIGNAL(clicked()), SLOT(slotScheduleButtonClicked()));
+    _scheduleBtn = new scheduleButton();
+    connect(_scheduleBtn, SIGNAL(clicked()), SLOT(slotScheduleButtonClicked()));
 
-    settingsButton* settings = new settingsButton();
-    connect(settings, SIGNAL(clicked()), SLOT(slotSettingsButtonClicked()));
+    _settingsBtn = new settingsButton();
+    connect(_settingsBtn, SIGNAL(clicked()), SLOT(slotSettingsButtonClicked()));
 
-    tabBarLayout->addWidget(schedule);
-    tabBarLayout->addWidget(settings);
+    tabBarLayout->addWidget(_scheduleBtn);
+    tabBarLayout->addWidget(_settingsBtn);
+
+    updateTabBarButtons();
+
+    return tabBarLayout;
+}
+
+void MainWidget::updateTabBarButtons()
+{
+    if (!_scheduleBtn || !_settingsBtn)
+        return;
 
     if (_currentTabIndex == SCHEDULE_TAB_INDEX)
     {
-        schedule->setChecked(true);
-        schedule->setDisabled(true);
+        _scheduleBtn->setChecked(true);
+        _scheduleBtn->setDisabled(true);
+        _settingsBtn->setChecked(false);
+        _settingsBtn->setDisabled(false);
     }
     else if (_currentTabIndex == SETTINGS_TAB_INDEX)
     {
-        settings->setChecked(true);
-        settings->setDisabled(true);
+        _settingsBtn->setChecked(true);
+        _settingsBtn->setDisabled(true);
+        _scheduleBtn->setChecked(false);
+        _scheduleBtn->setDisabled(false);
     }
-
-    return tabBarLayout;
 }
 
 void MainWidget::appConfig()
@@ -283,21 +295,8 @@ void MainWidget::switchToSchedule()
     // Вставляем на позицию 0, чтобы кнопки остались на позиции 1
     _mainLayout->insertWidget(0, scheduleTab);
 
-    // Обновляем кнопки (панель на позиции 1)
-    settingsButton* settingsBtn = qobject_cast<settingsButton*>(_mainLayout->itemAt(1)->layout()->itemAt(SETTINGS_TAB_INDEX)->widget());
-    scheduleButton* scheduleBtn = qobject_cast<scheduleButton*>(_mainLayout->itemAt(1)->layout()->itemAt(SCHEDULE_TAB_INDEX)->widget());
-
-    if (settingsBtn) {
-        settingsBtn->setChecked(false);
-        settingsBtn->setDisabled(false);
-    }
-    if (scheduleBtn) {
-        scheduleBtn->setChecked(true);
-        scheduleBtn->setDisabled(true);
-    }
-
     _currentTabIndex = SCHEDULE_TAB_INDEX;
-    _mainLayout->activate();
+    updateTabBarButtons();
 }
 
 void MainWidget::slotSettingsButtonClicked()
@@ -318,19 +317,6 @@ void MainWidget::slotSettingsButtonClicked()
     // Вставляем на позицию 0
     _mainLayout->insertWidget(0, settingsTab);
 
-    // Обновляем кнопки (панель на позиции 1)
-    scheduleButton* scheduleBtn = qobject_cast<scheduleButton*>(_mainLayout->itemAt(1)->layout()->itemAt(SCHEDULE_TAB_INDEX)->widget());
-    settingsButton* settingsBtn = qobject_cast<settingsButton*>(_mainLayout->itemAt(1)->layout()->itemAt(SETTINGS_TAB_INDEX)->widget());
-
-    if (scheduleBtn) {
-        scheduleBtn->setChecked(false);
-        scheduleBtn->setDisabled(false);
-    }
-    if (settingsBtn) {
-        settingsBtn->setChecked(true);
-        settingsBtn->setDisabled(true);
-    }
-
     _currentTabIndex = SETTINGS_TAB_INDEX;
-    _mainLayout->activate();
+    updateTabBarButtons();
 }
