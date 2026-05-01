@@ -35,9 +35,8 @@ private:
     QHBoxLayout* createDayBarLayout();       // top buttons
     QHBoxLayout* createWideLayout();         // horizontal position of the phone or monitor
     QVBoxLayout* createNarrowLayout();       // vertical position of the phone or monitor
-    QString getFormatText(Lesson* lesson);   // return html text
+    QWidget* createLessonRow(Lesson* lesson); // строка урока: время + название + кабинет + кружочек
     int getWeekdayNumber();
-    void onThemeButtonClicked(); //изменение темы
 
     QVBoxLayout* _scheduleTabLayout;
 

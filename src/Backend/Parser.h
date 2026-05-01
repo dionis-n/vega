@@ -12,6 +12,7 @@ struct Lesson
     QString _cabinet;
     int _subgroup = 0;
     int _weekParity = 0;
+    QString _type;         // "лк", "пр"
 };
 
 class Parser {
@@ -29,4 +30,4 @@ private:
     QStringList _groups;
 };
 
-#endif // PARSER_H
+#endif
