@@ -30,14 +30,14 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent), _mainLayout(new QVBox
     }
     else
     {
+        // Передаём groupIndex
         ScheduleTab* scheduleTab = new ScheduleTab(
-            Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber),
+            Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber, _groupIndex),
             _showEmptyLessons, this);
         _mainLayout->addWidget(scheduleTab);
         _currentTabIndex = SCHEDULE_TAB_INDEX;
     }
 
-    // Применяем сохранённую тему
     if (_currentTheme != THEME_SYSTEM) {
         setTheme(_currentTheme);
     }
@@ -283,16 +283,15 @@ void MainWidget::switchToSchedule()
     if (_currentTabIndex == SCHEDULE_TAB_INDEX) return;
     saveSettingsFromTab();
 
-    // Удаляем старый виджет с позиции 0
     QWidget* oldWidget = _mainLayout->itemAt(0)->widget();
     if (oldWidget) {
         _mainLayout->removeWidget(oldWidget);
         oldWidget->deleteLater();
     }
 
-    auto schedule = Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber);
+    // Передаём groupIndex при чтении
+    auto schedule = Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber, _groupIndex);
     ScheduleTab* scheduleTab = new ScheduleTab(schedule, _showEmptyLessons, this);
-    // Вставляем на позицию 0, чтобы кнопки остались на позиции 1
     _mainLayout->insertWidget(0, scheduleTab);
 
     _currentTabIndex = SCHEDULE_TAB_INDEX;

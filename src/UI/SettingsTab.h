@@ -45,4 +45,4 @@ private slots:
     void onLoadFileClicked();
 };
 
-#endif //VEGA_SETTINGSTAB_H
+#endif

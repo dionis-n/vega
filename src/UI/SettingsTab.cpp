@@ -25,7 +25,8 @@ SettingsTab::SettingsTab(const QStringList& groups, int groupIndex, int subgroup
     settingsLayout->addRow("", loadButton);
 
     groupComboBox->addItems(groups);
-    groupComboBox->setDisabled(showGroups);
+
+    groupComboBox->setEnabled(showGroups && !groups.isEmpty());
 
     subgroupComboBox->addItems( {"1", "2"} );
     showEmptyLessonsComboBox->addItems( {"Нет", "Да"} );
@@ -41,7 +42,7 @@ SettingsTab::SettingsTab(const QStringList& groups, int groupIndex, int subgroup
     weekComboBox->setCurrentIndex(week - 1);
     showEmptyLessonsComboBox->setCurrentIndex( int(showEmptyLessons) );
 
-    // Загружаем сохранённую тему
+
     QSettings settings;
     settings.beginGroup("/Settings");
     int savedTheme = settings.value("theme", 0).toInt();
@@ -119,9 +120,11 @@ void SettingsTab::onLoadFileClicked()
     MainWidget* mainWindow = qobject_cast<MainWidget*>(parentWidget());
     if (!mainWindow) return;
 
+    int currentGroupIndex = _groupIndex;
+
     QFileDialog::getOpenFileContent(
         "Excel files (*.xlsx)",
-        [mainWindow](const QString &fileName, const QByteArray &fileContent) {
+        [mainWindow, currentGroupIndex](const QString &fileName, const QByteArray &fileContent) {
             if (fileName.isEmpty()) {
                 qDebug() << "Файл не выбран";
                 return;
@@ -130,7 +133,7 @@ void SettingsTab::onLoadFileClicked()
             qDebug() << "Загружен файл:" << fileName << "Размер:" << fileContent.size() << "байт";
 
             Parser parser;
-            parser.loadXLSXFromMemory(fileContent, mainWindow->getGroupIndex());
+            parser.loadXLSXFromMemory(fileContent, currentGroupIndex);
             parser.writeXML(mainWindow->getStandardPath(), "Data.xml");
 
             mainWindow->switchToSchedule();

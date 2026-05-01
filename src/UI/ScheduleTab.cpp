@@ -175,7 +175,7 @@ QString ScheduleTab::getFormatText(Lesson* lesson)
 int ScheduleTab::getWeekdayNumber()
 {
     QDateTime time;
-    int weekday = time.currentDateTime().date().dayOfWeek() - 1;    // monday = 0, tuesday = 1 ...
+    int weekday = time.currentDateTime().date().dayOfWeek() - 1;    // m - 0
 
     if (weekday == SUNDAY || weekday == NONE)
     {
@@ -242,7 +242,7 @@ void ScheduleTab::resizeEvent(QResizeEvent* event) {
 
 void ScheduleTab::slotDayButtonClicked()
 {
-    int weekday = qobject_cast<dayButton*>( sender() )->_weekday;    // weekday = button index
+    int weekday = qobject_cast<dayButton*>( sender() )->_weekday;
 
     if (weekday == _currentWeekday)
     {
