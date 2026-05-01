@@ -23,7 +23,7 @@ class dayButton : public QPushButton
 public:
     explicit dayButton(const QString& str, int weekday, QWidget* parent = nullptr);
 
-    int _weekday;               // weekday = button index
+    int _weekday;
 };
 
 
@@ -44,5 +44,13 @@ public:
     settingsButton(QWidget* parent = nullptr);
 };
 
+class lessonTypeBadge : public QLabel
+{
+    Q_OBJECT
 
-#endif // CUSTOMELEMENTS_H
+public:
+    explicit lessonTypeBadge(const QString& type, QWidget* parent = nullptr);
+};
+
+
+#endif

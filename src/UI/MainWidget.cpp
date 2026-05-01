@@ -213,7 +213,7 @@ void MainWidget::slotScheduleButtonClicked()
 
 void MainWidget::slotCheckSystemTheme()
 {
-    // Если выбрана не системная тема — не трогаем
+    // Если выбрана не системная тема не трогаем
     if (_currentTheme != THEME_SYSTEM) {
         return;
     }
@@ -302,7 +302,7 @@ void MainWidget::slotSettingsButtonClicked()
 {
     if (_currentTabIndex == SETTINGS_TAB_INDEX) return;
 
-    // Удаляем старый виджет с позиции 0
+
     QWidget* oldWidget = _mainLayout->itemAt(0)->widget();
     if (oldWidget) {
         _mainLayout->removeWidget(oldWidget);
@@ -313,7 +313,7 @@ void MainWidget::slotSettingsButtonClicked()
     bool showGroups = !groups.isEmpty();
     SettingsTab* settingsTab = new SettingsTab(groups, _groupIndex, _subgroup, _currentWeekNumber,
                                                MAX_WEEK_NUMBER, _showEmptyLessons, this, showGroups);
-    // Вставляем на позицию 0
+
     _mainLayout->insertWidget(0, settingsTab);
 
     _currentTabIndex = SETTINGS_TAB_INDEX;
