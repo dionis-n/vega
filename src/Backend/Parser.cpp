@@ -64,6 +64,8 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
 
     _rawSchedule.clear();
     _rawSchedule.resize(6);
+    _allGroupsSchedule.clear(); // Новое поле: вектор для всех групп
+    _groups.clear();
 
     FILE* f = fopen("/temp_schedule.xlsx", "wb");
     if (!f) { qDebug() << "Ошибка: не удалось создать виртуальный файл"; return; }
@@ -75,87 +77,118 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
     auto wb = doc.workbook();
     auto ws = wb.worksheet("Занятия");
 
-    int groupColumn = 3 + groupIndex * 2;
-    qDebug() << "groupColumn:" << groupColumn;
+    // Сбор списка групп из строки 2
+    static const QRegularExpression hasCyrillic(QStringLiteral("[А-Яа-я]"));
+    for (int col = 3; col < 200; col += 3) {
+        QString g = getCellString(ws.cell(2, col)).trimmed();
+        if (g.isEmpty()) break;
+        if (!g.contains(hasCyrillic)) break;
+        _groups.append(g);
+    }
+    qDebug() << "Найдено групп:" << _groups.size() << _groups;
 
-    int currentDay = -1;
-    int currentLessonNumber = 0;
-    QStringList dayNames = {"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"};
+    if (groupIndex < 0 || groupIndex >= _groups.size()) {
+        qDebug() << "Внимание: groupIndex вне диапазона, использую 0";
+        groupIndex = 0;
+    }
 
-    for (int rowNum = 3; rowNum <= 100; ++rowNum) {
-        QString firstVal = getCellString(ws.cell(rowNum, 1)).trimmed();
+    // Инициализируем хранилище для всех групп
+    _allGroupsSchedule.resize(_groups.size());
+    for (auto& dayVec : _allGroupsSchedule) {
+        dayVec.resize(6);
+    }
 
-        // Определение дня недели
-        if (!firstVal.isEmpty()) {
-            for (int i = 0; i < dayNames.size(); ++i) {
-                if (firstVal == dayNames[i]) {
-                    currentDay = i;
-                    currentLessonNumber = 0;
-                    qDebug() << "День установлен:" << dayNames[i];
+    // Парсим расписание для КАЖДОЙ группы
+    for (int gIdx = 0; gIdx < _groups.size(); ++gIdx) {
+        int groupColumn = 3 + gIdx * 3;
+
+        int currentDay = -1;
+        int currentLessonNumber = 0;
+        const QStringList dayNames = {"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"};
+
+        static const QRegularExpression reSubgroup1(QStringLiteral(R"(\(1\*?пг\))"));
+        static const QRegularExpression reSubgroup2(QStringLiteral(R"(\(2\*?пг\))"));
+        static const QRegularExpression reEvenWeek(QStringLiteral(R"((^|\s)IIн)"));
+        static const QRegularExpression reOddWeek(QStringLiteral(R"((^|\s)Iн)"));
+
+        for (int rowNum = 3; rowNum <= 100; ++rowNum) {
+            QString firstVal = getCellString(ws.cell(rowNum, 1)).trimmed();
+
+            if (!firstVal.isEmpty()) {
+                if (firstVal.contains("Легенда")) {
                     break;
                 }
+                for (int i = 0; i < dayNames.size(); ++i) {
+                    if (firstVal == dayNames[i]) {
+                        currentDay = i;
+                        currentLessonNumber = 0;
+                        break;
+                    }
+                }
             }
-        }
 
-        if (currentDay < 0) {
-            continue;
-        }
-
-
-        // Определение номера пары
-        QString numStr = getCellString(ws.cell(rowNum, 2)).trimmed();
-        if (!numStr.isEmpty()) {
-            int n = numStr.toInt();
-            if (n > 0 && n <= 7) {
-                currentLessonNumber = n;
-            } else {
+            if (currentDay < 0) {
                 continue;
             }
+
+            QString numStr = getCellString(ws.cell(rowNum, 2)).trimmed();
+            if (!numStr.isEmpty()) {
+                int n = numStr.toInt();
+                if (n > 0 && n <= 7) {
+                    currentLessonNumber = n;
+                } else {
+                    continue;
+                }
+            }
+
+            if (currentLessonNumber == 0) {
+                continue;
+            }
+
+            QString rawSubject = getCellString(ws.cell(rowNum, groupColumn)).trimmed();
+            if (rawSubject.isEmpty()) {
+                continue;
+            }
+
+            if (currentDay == 5 && currentLessonNumber == 6)
+                break;
+
+            if (rawSubject.contains("Легенда") || rawSubject.contains("курс") ||
+                rawSubject.contains("дистанционно") || rawSubject.contains("кампусе") ||
+                rawSubject.contains("Полигон") || rawSubject.contains("ФОК ") ||
+                rawSubject.contains("нечетные") || rawSubject.contains("четные") ||
+                rawSubject.contains("лекция") || rawSubject.contains("подгруппа")) {
+                continue;
+            }
+
+            int subgroup = 0;
+            if (rawSubject.contains(reSubgroup1))      subgroup = 1;
+            else if (rawSubject.contains(reSubgroup2)) subgroup = 2;
+
+            int weekParity = 0;
+            if (rawSubject.contains(reEvenWeek))     weekParity = 2;
+            else if (rawSubject.contains(reOddWeek)) weekParity = 1;
+
+            QString cleanedSubject = cleanSubjectName(rawSubject);
+            if (cleanedSubject.isEmpty() || cleanedSubject.length() < 2) {
+                continue;
+            }
+
+            QString cabinet = getCellString(ws.cell(rowNum, groupColumn + 2)).trimmed();
+
+            Lesson* lesson = new Lesson();
+            lesson->_number = currentLessonNumber;
+            lesson->_name = cleanedSubject;
+            lesson->_cabinet = cabinet;
+            lesson->_subgroup = subgroup;
+            lesson->_weekParity = weekParity;
+
+            _allGroupsSchedule[gIdx][currentDay].append(lesson);
         }
-
-        if (currentDay == 5 && currentLessonNumber == 6)
-        {
-            qDebug() << "Конец субботы";
-            break; // После субботы не парсим
-        }
-
-        if (currentLessonNumber == 0) {
-            continue;
-        }
-
-        // Чтение предмета и аудитории
-        QString subject = getCellString(ws.cell(rowNum, groupColumn)).trimmed();
-        if (subject.isEmpty()) {
-            continue;
-        }
-
-        // ✅ Пропускаем легенду и мусор
-        if (subject.contains("Легенда") || subject.contains("курс") ||
-            subject.contains("дистанционно") || subject.contains("кампусе") ||
-            subject.contains("Полигон") || subject.contains("ФОК") ||
-            subject.contains("нечетные") || subject.contains("четные") ||
-            subject.contains("лекция") || subject.contains("подгруппа")) {
-            continue;
-        }
-
-        QString cleanedSubject = cleanSubjectName(subject);
-        if (cleanedSubject.isEmpty() || cleanedSubject.length() < 2) {
-            continue;
-        }
-
-        QString cabinet = getCellString(ws.cell(rowNum, groupColumn + 2)).trimmed();
-
-        Lesson* lesson = new Lesson();
-        lesson->_number = currentLessonNumber;
-        lesson->_name = cleanedSubject;
-        lesson->_cabinet = cabinet;
-
-        _rawSchedule[currentDay].append(lesson);
-        qDebug() << "  Добавлено: день" << currentDay
-                 << "пара" << lesson->_number
-                 << "предмет:" << lesson->_name
-                 << "кабинет:" << lesson->_cabinet;
     }
+
+    // Копируем расписание выбранной группы в _rawSchedule для обратной совместимости
+    _rawSchedule = _allGroupsSchedule[groupIndex];
 
     doc.close();
     qDebug() << "=== loadXLSXFromMemory FINISH ===";
@@ -184,16 +217,32 @@ void Parser::writeXML(const QString& directory, const QString& fileNameXML)
     stream.writeStartDocument();
     stream.writeStartElement("schedule");
 
-    for (int dayIndex = 0; dayIndex < _rawSchedule.size(); ++dayIndex) {
-        stream.writeStartElement("day");
-        for (Lesson* lesson : _rawSchedule[dayIndex]) {
-            stream.writeStartElement("lesson");
-            stream.writeTextElement("number", QString::number(lesson->_number));
-            stream.writeTextElement("name", lesson->_name);
-            stream.writeTextElement("cabinet", lesson->_cabinet);
+    stream.writeStartElement("groups");
+    for (const QString& g : _groups) {
+        stream.writeTextElement("group", g);
+    }
+    stream.writeEndElement();
+
+    // Сохраняем расписание для каждой группы
+    for (int gIdx = 0; gIdx < _allGroupsSchedule.size(); ++gIdx) {
+        stream.writeStartElement("groupSchedule");
+        stream.writeAttribute("index", QString::number(gIdx));
+
+        for (int dayIndex = 0; dayIndex < _allGroupsSchedule[gIdx].size(); ++dayIndex) {
+            stream.writeStartElement("day");
+            for (Lesson* lesson : _allGroupsSchedule[gIdx][dayIndex]) {
+                stream.writeStartElement("lesson");
+                stream.writeAttribute("subgroup", QString::number(lesson->_subgroup));
+                stream.writeAttribute("weekParity", QString::number(lesson->_weekParity));
+                stream.writeTextElement("number", QString::number(lesson->_number));
+                stream.writeTextElement("name", lesson->_name);
+                stream.writeTextElement("cabinet", lesson->_cabinet);
+                stream.writeEndElement();
+            }
             stream.writeEndElement();
         }
-        stream.writeEndElement();
+
+        stream.writeEndElement(); // groupSchedule
     }
 
     stream.writeEndElement();
@@ -202,11 +251,9 @@ void Parser::writeXML(const QString& directory, const QString& fileNameXML)
     qDebug() << "=== writeXML FINISH ===";
 }
 
-QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QString& fileNameXML, int userSubgroup, int userWeek)
+QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QString& fileNameXML,
+                                           int userSubgroup, int userWeek, int groupIndex)
 {
-    Q_UNUSED(userSubgroup);
-    Q_UNUSED(userWeek);
-
     QVector<QVector<Lesson*>> schedule(6);
     QFile file(directory + "/" + fileNameXML);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -214,31 +261,56 @@ QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QStrin
         return schedule;
     }
 
+    const int userWeekParity = (userWeek % 2 == 1) ? 1 : 2;
+
     QXmlStreamReader stream(&file);
     QString number, name, cabinet;
-    int index = -1;
+    int dayIndex = -1;
+    int curSubgroup = 0;
+    int curWeekParity = 0;
+    bool inDay = false;
+    int currentGroupIdx = -1;
 
     while (!stream.atEnd() && !stream.hasError()) {
         stream.readNext();
         QString token = stream.name().toString();
 
         if (stream.isStartElement()) {
-            if (token == "day") {
-                ++index;
-            } else if (token == "number") {
+            if (token == "groupSchedule") {
+                currentGroupIdx = stream.attributes().value("index").toInt();
+            } else if (token == "day" && currentGroupIdx == groupIndex) {
+                ++dayIndex;
+                inDay = true;
+            } else if (token == "lesson" && inDay && currentGroupIdx == groupIndex) {
+                curSubgroup = stream.attributes().value("subgroup").toInt();
+                curWeekParity = stream.attributes().value("weekParity").toInt();
+                number.clear();
+                name.clear();
+                cabinet.clear();
+            } else if (inDay && token == "number" && currentGroupIdx == groupIndex) {
                 number = stream.readElementText();
-            } else if (token == "name") {
+            } else if (inDay && token == "name" && currentGroupIdx == groupIndex) {
                 name = stream.readElementText();
-            } else if (token == "cabinet") {
+            } else if (inDay && token == "cabinet" && currentGroupIdx == groupIndex) {
                 cabinet = stream.readElementText();
             }
-        } else if (stream.isEndElement() && token == "lesson") {
-            if (index >= 0 && index < 6) {
-                Lesson* lesson = new Lesson();
-                lesson->_number = number.toInt();
-                lesson->_name = name;
-                lesson->_cabinet = cabinet;
-                schedule[index].append(lesson);
+        } else if (stream.isEndElement()) {
+            if (token == "day" && currentGroupIdx == groupIndex) {
+                inDay = false;
+            } else if (token == "lesson" && dayIndex >= 0 && dayIndex < 6 && currentGroupIdx == groupIndex) {
+                bool keep = true;
+                if (curSubgroup != 0 && curSubgroup != userSubgroup) keep = false;
+                if (curWeekParity != 0 && curWeekParity != userWeekParity) keep = false;
+
+                if (keep) {
+                    Lesson* lesson = new Lesson();
+                    lesson->_number = number.toInt();
+                    lesson->_name = name;
+                    lesson->_cabinet = cabinet;
+                    lesson->_subgroup = curSubgroup;
+                    lesson->_weekParity = curWeekParity;
+                    schedule[dayIndex].append(lesson);
+                }
             }
         }
     }
@@ -251,10 +323,28 @@ QStringList Parser::groups(const QString& directory, const QString& fileNameXML)
     QStringList result;
     QFile file(directory + "/" + fileNameXML);
     if (!file.open(QIODevice::ReadOnly)) {
-        result << "Группа 1" << "Группа 2" << "Группа 3";
         return result;
     }
-    result << "Группа 1" << "Группа 2" << "Группа 3";
+
+    QXmlStreamReader stream(&file);
+    bool inGroups = false;
+
+    while (!stream.atEnd() && !stream.hasError()) {
+        stream.readNext();
+        QString token = stream.name().toString();
+
+        if (stream.isStartElement()) {
+            if (token == "groups") {
+                inGroups = true;
+            } else if (token == "group" && inGroups) {
+                result << stream.readElementText();
+            } else if (token == "day") {
+                break; // список групп уже считан, дальше — расписание
+            }
+        } else if (stream.isEndElement() && token == "groups") {
+            break;
+        }
+    }
     file.close();
     return result;
 }

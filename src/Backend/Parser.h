@@ -4,29 +4,29 @@
 #include <QVector>
 #include <QStringList>
 #include <QByteArray>
+
 struct Lesson
 {
     int _number;
     QString _name;
     QString _cabinet;
+    int _subgroup = 0;
+    int _weekParity = 0;
 };
 
 class Parser {
 public:
-    // Загружает XLSX из памяти (QByteArray) и заполняет _rawSchedule
     void loadXLSXFromMemory(const QByteArray& data, int groupIndex);
-
-    // Сохраняет _rawSchedule в XML файл
     void writeXML(const QString& directory, const QString& fileName);
 
-    // Читает XML файл и возвращает расписание (статический метод)
-    static QVector<QVector<Lesson*>> readXML(const QString& directory, const QString& fileName, int userSubgroup, int userWeek);
-
-    // Возвращает список групп из XML (статический метод)
+    static QVector<QVector<Lesson*>> readXML(const QString& directory, const QString& fileName,
+                                              int userSubgroup, int userWeek, int groupIndex = 0);
     static QStringList groups(const QString& directory, const QString& fileName);
 
 private:
-    QVector<QVector<Lesson*>> _rawSchedule;  // 6 дней, внутри — список занятий
+    QVector<QVector<Lesson*>> _rawSchedule;  // 6 дней
+    QVector<QVector<QVector<Lesson*>>> _allGroupsSchedule; // все группы
+    QStringList _groups;
 };
 
 #endif // PARSER_H
