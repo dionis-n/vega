@@ -30,7 +30,6 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent), _mainLayout(new QVBox
     }
     else
     {
-        // Передаём groupIndex
         ScheduleTab* scheduleTab = new ScheduleTab(
             Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber, _groupIndex),
             _showEmptyLessons, this);
@@ -213,7 +212,6 @@ void MainWidget::slotScheduleButtonClicked()
 
 void MainWidget::slotCheckSystemTheme()
 {
-    // Если выбрана не системная тема не трогаем
     if (_currentTheme != THEME_SYSTEM) {
         return;
     }

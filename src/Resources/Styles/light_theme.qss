@@ -1,4 +1,4 @@
-scheduleLabel 
+QWidget#lessonCard
 {
     background-color: white;
     border-radius: 20px;
