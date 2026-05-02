@@ -160,12 +160,14 @@ C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u0
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qkeysequence.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qpaintdevice.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qpalette.h \
+  C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qpicture.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qpixelformat.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qpixmap.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qpolygon.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qregion.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qrgb.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qrgba64.h \
+  C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qtextdocument.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qtgui-config.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qtguiexports.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtGui/qtguiglobal.h \
@@ -175,6 +177,7 @@ C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u0
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/QComboBox \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/QFileDialog \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/QFormLayout \
+  C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/QLabel \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/QLayout \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/QWidget \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/qabstractitemdelegate.h \
@@ -187,6 +190,7 @@ C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u0
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/qformlayout.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/qframe.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/qgridlayout.h \
+  C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/qlabel.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/qlayout.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/qlayoutitem.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtWidgets/qrubberband.h \

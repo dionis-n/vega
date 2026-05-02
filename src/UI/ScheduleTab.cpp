@@ -34,6 +34,7 @@ ScheduleTab::~ScheduleTab()
 
 QHBoxLayout* ScheduleTab::createDayBarLayout() {
     QHBoxLayout* dayBarLayout = new QHBoxLayout();
+    dayBarLayout->setSpacing(0);
 
     for (int i = 0; i < _dayName.size(); ++i)
     {
@@ -54,6 +55,7 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     row->setObjectName("lessonCard");
     row->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     row->setMinimumHeight(40);
+    row->setMinimumWidth(0);
 
     QHBoxLayout* rowLayout = new QHBoxLayout(row);
     rowLayout->setContentsMargins(8, 2, 8, 2);
@@ -74,6 +76,7 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     timeLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     timeLabel->setStyleSheet("font-size: 15px;");
+    timeLabel->setMinimumWidth(0);
 
     // Название
     QLabel* nameLabel = new QLabel(lesson->_name);
@@ -81,6 +84,7 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     nameLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     nameLabel->setStyleSheet("font-weight: bold;");
     nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    nameLabel->setMinimumWidth(0);
 
     // Кружочек
     lessonTypeBadge* badge = nullptr;
@@ -91,6 +95,7 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
 
     // Контейнер: кружочек + название
     QWidget* nameContainer = new QWidget();
+    nameContainer->setMinimumWidth(0);
     QHBoxLayout* nameLayout = new QHBoxLayout(nameContainer);
     nameLayout->setContentsMargins(0, 0, 0, 0);
     nameLayout->setSpacing(0);
@@ -109,6 +114,7 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     cabinetLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     cabinetLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     cabinetLabel->setStyleSheet("font-size: 15px;");
+    cabinetLabel->setMinimumWidth(0);
 
     rowLayout->addWidget(timeLabel, 0, Qt::AlignVCenter);
     rowLayout->addSpacing(10);
@@ -161,6 +167,7 @@ QHBoxLayout* ScheduleTab::createWideLayout()
         columnLayout->addStretch();
 
         QWidget* columnWidget = new QWidget();
+        columnWidget->setMinimumWidth(0);
         columnWidget->setLayout(columnLayout);
 
         wideLayout->addWidget(columnWidget, 1);

@@ -22,7 +22,32 @@ SettingsTab::SettingsTab(const QStringList& groups, int groupIndex, int subgroup
 
     QPushButton* loadButton = new QPushButton("Загрузить расписание (.XLSX)");
     connect(loadButton, &QPushButton::clicked, this, &SettingsTab::onLoadFileClicked);
-    settingsLayout->addRow("", loadButton);
+    settingsLayout->addRow(loadButton);
+
+
+
+    _statusLabel = new QLabel("");
+    _statusLabel->setVisible(false);
+    _statusLabel->setAlignment(Qt::AlignCenter);
+    settingsLayout->addRow(_statusLabel);
+
+    QSettings settings;
+    settings.beginGroup("/Settings");
+    if (settings.contains("statusMessage")) {
+        QString msg = settings.value("statusMessage").toString();
+        bool success = settings.value("statusSuccess", false).toBool();
+        _statusLabel->setText(msg);
+        _statusLabel->setStyleSheet(success ? "color: green; font-weight: bold;" : "color: red; font-weight: bold;");
+        _statusLabel->setVisible(true);
+    }
+    settings.endGroup();
+
+    groupComboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    subgroupComboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    weekComboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    showEmptyLessonsComboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    themeComboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    loadButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     groupComboBox->addItems(groups);
 
@@ -42,12 +67,11 @@ SettingsTab::SettingsTab(const QStringList& groups, int groupIndex, int subgroup
     weekComboBox->setCurrentIndex(week - 1);
     showEmptyLessonsComboBox->setCurrentIndex( int(showEmptyLessons) );
 
-
-    QSettings settings;
-    settings.beginGroup("/Settings");
-    int savedTheme = settings.value("theme", 0).toInt();
-    settings.endGroup();
+    MainWidget* mainWindow = qobject_cast<MainWidget*>(parent);
+    int savedTheme = mainWindow ? mainWindow->getCurrentTheme() : 0;
+    themeComboBox->blockSignals(true);
     themeComboBox->setCurrentIndex(savedTheme);
+    themeComboBox->blockSignals(false);
 
     groupComboBox->setMaxVisibleItems(COUNT_MAX_VISIBLE_ITEMS);
     weekComboBox->setMaxVisibleItems(COUNT_MAX_VISIBLE_ITEMS);
@@ -107,12 +131,6 @@ void SettingsTab::onThemeChanged(int index)
     if (mainWindow) {
         mainWindow->setTheme(index);
     }
-
-    // Сохраняем настройку темы
-    QSettings settings;
-    settings.beginGroup("/Settings");
-    settings.setValue("theme", index);
-    settings.endGroup();
 }
 
 void SettingsTab::onLoadFileClicked()
@@ -121,22 +139,37 @@ void SettingsTab::onLoadFileClicked()
     if (!mainWindow) return;
 
     int currentGroupIndex = _groupIndex;
+    _statusLabel->setVisible(false);
 
     QFileDialog::getOpenFileContent(
         "Excel files (*.xlsx)",
-        [mainWindow, currentGroupIndex](const QString &fileName, const QByteArray &fileContent) {
+        [this, mainWindow, currentGroupIndex](const QString &fileName, const QByteArray &fileContent) {
             if (fileName.isEmpty()) {
-                qDebug() << "Файл не выбран";
+                _statusLabel->setText("Файл не выбран");
+                _statusLabel->setStyleSheet("color: red; font-weight: bold;");
+                _statusLabel->setVisible(true);
+
+                QSettings settings;
+                settings.beginGroup("/Settings");
+                settings.setValue("statusMessage", "Файл не выбран");
+                settings.setValue("statusSuccess", false);
+                settings.endGroup();
                 return;
             }
-
-            qDebug() << "Загружен файл:" << fileName << "Размер:" << fileContent.size() << "байт";
 
             Parser parser;
             parser.loadXLSXFromMemory(fileContent, currentGroupIndex);
             parser.writeXML(mainWindow->getStandardPath(), "Data.xml");
 
-            mainWindow->switchToSchedule();
+            _statusLabel->setText("Расписание загружено");
+            _statusLabel->setStyleSheet("color: green; font-weight: bold;");
+            _statusLabel->setVisible(true);
+
+            QSettings settings;
+            settings.beginGroup("/Settings");
+            settings.setValue("statusMessage", "Расписание загружено");
+            settings.setValue("statusSuccess", true);
+            settings.endGroup();
         }
         );
 }

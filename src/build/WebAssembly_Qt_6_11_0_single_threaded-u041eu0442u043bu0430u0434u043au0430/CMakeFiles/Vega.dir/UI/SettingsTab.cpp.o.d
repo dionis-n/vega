@@ -892,6 +892,10 @@ CMakeFiles\Vega.dir\UI\SettingsTab.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtimezone.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qurl.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qdialog.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QLabel \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qlabel.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qpicture.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtextdocument.h \
   C:\Users\ADMIN\Documents\vega\src\UI\MainWidget.h \
   C:\Users\ADMIN\Documents\vega\src\UI\ScheduleTab.h \
   C:\Users\ADMIN\Documents\vega\src\Backend\Parser.h \
@@ -902,10 +906,6 @@ CMakeFiles\Vega.dir\UI\SettingsTab.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QPushButton \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qpushbutton.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qabstractbutton.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QLabel \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qlabel.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qpicture.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtextdocument.h \
   C:\Users\ADMIN\Documents\vega\src\UI\CommonFunctions.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\QGuiApplication \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qguiapplication.h \
