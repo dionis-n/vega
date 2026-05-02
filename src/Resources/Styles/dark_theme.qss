@@ -1,17 +1,24 @@
-QWidget#lessonCard
-{
-    background-color: #1d1d1c;
+QWidget {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+QWidget#lessonCard {
+    background-color: #3a3a3a;
     border-radius: 20px;
     border-style: outset;
     padding: 5px;
     min-height: 40px;
 }
 
+QWidget#lessonCard QLabel {
+    color: #ffffff;
+    background: transparent;
+}
 
-dayButton 
-{
-    background-color: #1d1d1c;
-    color: white;
+dayButton {
+    background-color: #3a3a3a;
+    color: #ffffff;
     border-radius: 25px;
     border-style: outset;
     min-height: 50px;
@@ -20,10 +27,9 @@ dayButton
     max-width: 50px;
 }
 
-dayButton:checked 
-{
-    background-color: white;
-    color: black;
+dayButton:checked {
+    background-color: #ffffff;
+    color: #000000;
     border-radius: 25px;
     border-style: outset;
     min-height: 50px;
@@ -32,9 +38,7 @@ dayButton:checked
     max-width: 50px;
 }
 
-
-scheduleButton 
-{
+scheduleButton {
     border-image: url(:/Icons/Dark/Resources/Icons/Dark/schedule.svg);
     min-height: 48px;
     max-height: 48px;
@@ -42,18 +46,15 @@ scheduleButton
     max-width: 48px;
 }
 
-scheduleButton:checked 
-{
+scheduleButton:checked {
     border-image: url(:/Icons/Dark/Resources/Icons/Dark/schedule_fill.svg);
     min-height: 48px;
     max-height: 48px;
     min-width: 48px;
-    max-width: 48px;   
+    max-width: 48px;
 }
 
-
-settingsButton 
-{
+settingsButton {
     border-image: url(:/Icons/Dark/Resources/Icons/Dark/settings.svg);
     min-height: 48px;
     max-height: 48px;
@@ -61,13 +62,12 @@ settingsButton
     max-width: 48px;
 }
 
-settingsButton:checked 
-{
+settingsButton:checked {
     border-image: url(:/Icons/Dark/Resources/Icons/Dark/settings_fill.svg);
     min-height: 48px;
     max-height: 48px;
     min-width: 48px;
-    max-width: 48px;   
+    max-width: 48px;
 }
 
 lessonTypeBadge {
@@ -76,4 +76,8 @@ lessonTypeBadge {
     min-height: 20px;
     max-height: 20px;
     border-radius: 10px;
+}
+
+QWidget#lessonCard QWidget {
+    background: transparent;
 }
