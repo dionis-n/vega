@@ -10,6 +10,7 @@
 #include <QDateTime>
 #include <QStandardPaths>
 #include <QFileDialog>
+#include <QLabel>
 
 enum
 {
@@ -34,6 +35,7 @@ private:
     int _subgroup;
     int _week;
     bool _showEmptyLessons;
+    QLabel* _statusLabel;
 
 private slots:
     void slotGroup(int index);

@@ -1,3 +1,10 @@
+QHBoxLayout {
+    min-width: 0;
+}
+QComboBox, QPushButton {
+    min-width: 0;
+}
+
 QWidget {
     background-color: #f0f0f0;
     color: #3a3a3a;
@@ -19,23 +26,23 @@ QWidget#lessonCard QLabel {
 dayButton {
     background-color: #ffffff;
     color: #3a3a3a;
-    border-radius: 25px;
+    border-radius: 20px;
     border-style: outset;
-    min-height: 50px;
-    max-height: 50px;
-    min-width: 50px;
-    max-width: 50px;
+    min-width: 40px;
+    max-width: 40px;
+    min-height: 40px;
+    max-height: 40px;
 }
 
 dayButton:checked {
     background-color: #3a3a3a;
     color: #ffffff;
-    border-radius: 25px;
+    border-radius: 20px;
     border-style: outset;
-    min-height: 50px;
-    max-height: 50px;
-    min-width: 50px;
-    max-width: 50px;
+    min-height: 40px;
+    max-height: 40px;
+    min-width: 40px;
+    max-width: 40px;
 }
 
 scheduleButton {
@@ -84,4 +91,8 @@ QWidget#lessonCard QWidget {
 
 QWidget#lessonCard QWidget {
     background: transparent;
+}
+
+QWidget#lessonCard {
+    min-width: 0;
 }
