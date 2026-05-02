@@ -7,14 +7,14 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent), _mainLayout(new QVBox
 {
     appConfig();
 
-    if (_showEmptyLessons)
+    /*if (_showEmptyLessons)
     {
         this->setFixedHeight(this->height() + EXTRA_SIZE);
     }
     else
     {
         this->setFixedHeight(this->height());
-    }
+    }*/
 
     slotCheckSystemTheme();
     _timer = new QTimer(this);
@@ -124,7 +124,7 @@ void MainWidget::saveSettingsFromTab()
 {
     SettingsTab* settings = qobject_cast<SettingsTab*>(_mainLayout->itemAt(0)->widget());
 
-    if (settings->getShowEmptyLessons() != _showEmptyLessons)
+    /*if (settings->getShowEmptyLessons() != _showEmptyLessons)
     {
         if (_showEmptyLessons)
         {
@@ -134,7 +134,7 @@ void MainWidget::saveSettingsFromTab()
         {
             this->setFixedHeight(this->height() + EXTRA_SIZE);
         }
-    }
+    }*/
 
     _groupIndex = settings->getGroupIndex();
     _subgroup = settings->getSubgroup();
@@ -190,7 +190,7 @@ void MainWidget::closeEvent(QCloseEvent* event)
 
     if (_showEmptyLessons)
     {
-        this->setFixedHeight(this->height() - EXTRA_SIZE);
+        //this->setFixedHeight(this->height() - EXTRA_SIZE);
         _settings.setValue("geometry", this->size());
     }
     else
