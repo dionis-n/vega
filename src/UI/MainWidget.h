@@ -86,4 +86,4 @@ private slots:
     void slotCheckSystemTheme();
 };
 
-#endif // MAINWIDGET_H
+#endif

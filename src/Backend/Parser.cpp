@@ -15,7 +15,7 @@ static const QRegularExpression reLecture(QStringLiteral(R"(\s*лк\s*)"));
 // Функция определения типа занятия
 static QString extractLessonType(const QString& raw) {
     if (raw.contains(reLecture)) return "лк";
-    if (!raw.isEmpty()) return "пр";  // всё что не лк — практика
+    if (!raw.isEmpty()) return "пр";
     return QString();
 }
 

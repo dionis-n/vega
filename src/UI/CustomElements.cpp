@@ -28,9 +28,9 @@ lessonTypeBadge::lessonTypeBadge(const QString& type, QWidget* parent) : QLabel(
 
     if (type == "лк") {
         setText("лк");
-        setStyleSheet("background-color:#4CAF50;color:white;font-size:11px;font-weight:bold;");
+        setStyleSheet("background-color:#2196F3;color:white;font-size:11px;font-weight:bold;");
     } else if (type == "пр") {
         setText("пр");
-        setStyleSheet("background-color:#2196F3;color:white;font-size:11px;font-weight:bold;");
+        setStyleSheet("background-color:#4CAF50;color:white;font-size:11px;font-weight:bold;");
     }
 }

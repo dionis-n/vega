@@ -50,14 +50,14 @@ QHBoxLayout* ScheduleTab::createDayBarLayout() {
 
 QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
 {
-    scheduleLabel* row = new scheduleLabel(QString());
+    QWidget* row = new QWidget();
+    row->setObjectName("lessonCard");
     row->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     row->setMinimumHeight(40);
 
     QHBoxLayout* rowLayout = new QHBoxLayout(row);
-    rowLayout->setContentsMargins(5, 2, 5, 2);
+    rowLayout->setContentsMargins(8, 2, 8, 2);
     rowLayout->setSpacing(0);
-    rowLayout->setAlignment(Qt::AlignVCenter);
 
     // Время
     QString time;
@@ -69,12 +69,18 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     {
         time = _lessonTime[lesson->_number - 1];
     }
+
     QLabel* timeLabel = new QLabel(time.trimmed());
     timeLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    timeLabel->setStyleSheet("font-size: 15px;");
 
     // Название
     QLabel* nameLabel = new QLabel(lesson->_name);
     nameLabel->setWordWrap(true);
+    nameLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    nameLabel->setStyleSheet("font-weight: bold;");
+    nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
     // Кружочек
     lessonTypeBadge* badge = nullptr;
@@ -83,29 +89,32 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
         badge = new lessonTypeBadge(lesson->_type);
     }
 
-    // Контейнер: кружочек + название + пружина
+    // Контейнер: кружочек + название
     QWidget* nameContainer = new QWidget();
     QHBoxLayout* nameLayout = new QHBoxLayout(nameContainer);
     nameLayout->setContentsMargins(0, 0, 0, 0);
     nameLayout->setSpacing(0);
-    nameLayout->setAlignment(Qt::AlignVCenter);
+
     if (badge)
     {
-        nameLayout->addWidget(badge);
+
+        nameLayout->addWidget(badge, 0, Qt::AlignVCenter);
         nameLayout->addSpacing(10);
     }
     nameLayout->addWidget(nameLabel);
-    nameLayout->addStretch();
+    //nameLayout->addStretch();
 
     // Кабинет
     QLabel* cabinetLabel = new QLabel(lesson->_cabinet);
     cabinetLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    cabinetLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    cabinetLabel->setStyleSheet("font-size: 15px;");
 
-    rowLayout->addWidget(timeLabel);
+    rowLayout->addWidget(timeLabel, 0, Qt::AlignVCenter);
     rowLayout->addSpacing(10);
     rowLayout->addWidget(nameContainer, 1);
     rowLayout->addSpacing(8);
-    rowLayout->addWidget(cabinetLabel);
+    rowLayout->addWidget(cabinetLabel, 0, Qt::AlignVCenter);
 
     return row;
 }
@@ -149,13 +158,12 @@ QHBoxLayout* ScheduleTab::createWideLayout()
             ++lastNumber;
         }
 
-        // Растяжка для пустого места внизу колонки
         columnLayout->addStretch();
 
         QWidget* columnWidget = new QWidget();
         columnWidget->setLayout(columnLayout);
 
-        wideLayout->addWidget(columnWidget, 1);  // stretch = 1 — все колонки поровну
+        wideLayout->addWidget(columnWidget, 1);
     }
 
     return wideLayout;
@@ -232,7 +240,6 @@ void ScheduleTab::resizeEvent(QResizeEvent* event) {
     {
         if (_wideMode) return;
 
-        // Удаляем narrow layout
         QLayout* oldLayout = _scheduleTabLayout->itemAt(1)->layout();
         if (oldLayout)
         {
@@ -253,11 +260,9 @@ void ScheduleTab::resizeEvent(QResizeEvent* event) {
     {
         if (!_wideMode) return;
 
-        // Удаляем wide layout
         QLayout* oldLayout = _scheduleTabLayout->itemAt(1)->layout();
         if (oldLayout)
         {
-            // Удаляем все колонки (QWidget + внутренний QVBoxLayout)
             QLayoutItem* item;
             while ((item = oldLayout->takeAt(0)) != nullptr)
             {
@@ -291,10 +296,7 @@ void ScheduleTab::slotDayButtonClicked()
 {
     int weekday = qobject_cast<dayButton*>( sender() )->_weekday;
 
-    if (weekday == _currentWeekday)
-    {
-        return;
-    }
+    if (weekday == _currentWeekday) return;
 
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(_currentWeekday)->widget() )
         ->setChecked(false);
@@ -308,10 +310,7 @@ void ScheduleTab::slotDayButtonClicked()
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(weekday)->widget() )
         ->setDisabled(true);
 
-    if (_wideMode)
-    {
-        return;
-    }
+    if (_wideMode) return;
 
     QVBoxLayout* narrowLayout = qobject_cast<QVBoxLayout*>( _scheduleTabLayout->itemAt(1)->layout() );
     narrowLayout->setAlignment(Qt::AlignTop);

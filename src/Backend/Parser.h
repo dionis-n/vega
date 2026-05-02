@@ -26,7 +26,7 @@ public:
 
 private:
     QVector<QVector<Lesson*>> _rawSchedule;  // 6 дней
-    QVector<QVector<QVector<Lesson*>>> _allGroupsSchedule; // все группы
+    QVector<QVector<QVector<Lesson*>>> _allGroupsSchedule;
     QStringList _groups;
 };
 
