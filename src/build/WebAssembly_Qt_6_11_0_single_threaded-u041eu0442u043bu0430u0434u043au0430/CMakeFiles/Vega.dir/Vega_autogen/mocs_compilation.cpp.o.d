@@ -846,6 +846,8 @@ CMakeFiles\Vega.dir\Vega_autogen\mocs_compilation.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvector.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QStringList \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QByteArray \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QSettings \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsettings.h \
   C:\Users\ADMIN\Documents\vega\src\build\WebAssembly_Qt_6_11_0_single_threaded-u041eu0442u043bu0430u0434u043au0430\Vega_autogen\KRKR4BN5RM\..\..\..\..\UI\CommonFunctions.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\QGuiApplication \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qguiapplication.h \
@@ -949,8 +951,6 @@ CMakeFiles\Vega.dir\Vega_autogen\mocs_compilation.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qdialog.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QApplication \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qapplication.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QSettings \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsettings.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QTimer \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtimer.h \
   C:\Users\ADMIN\Documents\vega\src\build\WebAssembly_Qt_6_11_0_single_threaded-u041eu0442u043bu0430u0434u043au0430\Vega_autogen\KRKR4BN5RM\moc_ScheduleTab.cpp \

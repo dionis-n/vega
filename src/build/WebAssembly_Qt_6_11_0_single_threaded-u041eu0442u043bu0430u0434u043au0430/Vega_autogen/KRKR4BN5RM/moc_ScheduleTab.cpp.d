@@ -7,6 +7,7 @@ C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u0
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/QList \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/QObject \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/QRect \
+  C:/Qt/6.11.0/wasm_singlethread/include/QtCore/QSettings \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/QSize \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/QSizeF \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/QString \
@@ -109,6 +110,7 @@ C:/Users/ADMIN/Documents/vega/src/build/WebAssembly_Qt_6_11_0_single_threaded-u0
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/qscopedpointer.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/qscopeguard.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/qset.h \
+  C:/Qt/6.11.0/wasm_singlethread/include/QtCore/qsettings.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/qshareddata.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/qshareddata_impl.h \
   C:/Qt/6.11.0/wasm_singlethread/include/QtCore/qsharedpointer.h \

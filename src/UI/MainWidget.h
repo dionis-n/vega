@@ -46,6 +46,8 @@ public:
     QString getStandardPath() const { return _standardPath; }
     void switchToSchedule();
 
+    void refreshSettingsTab();
+
 private:
     QHBoxLayout* createTabBarLayout();
     void appConfig();

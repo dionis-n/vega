@@ -17,13 +17,17 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent), _mainLayout(new QVBox
     }*/
 
     slotCheckSystemTheme();
+
+    QStringList groups = Parser::groups(_standardPath, _fileNameXML);
+
     _timer = new QTimer(this);
     connect(_timer, SIGNAL(timeout()), this, SLOT(slotCheckSystemTheme()));
     _timer->start(100);
 
     if (!_settings.contains("/Settings/groupIndex"))
     {
-        SettingsTab* settingsTab = new SettingsTab(QStringList(), _groupIndex, _subgroup,
+        QStringList groups = Parser::groups(_standardPath, _fileNameXML);
+        SettingsTab* settingsTab = new SettingsTab(groups, _groupIndex, _subgroup,
                                                    _currentWeekNumber, MAX_WEEK_NUMBER, _showEmptyLessons, this);
         _mainLayout->addWidget(settingsTab);
         _currentTabIndex = SETTINGS_TAB_INDEX;
@@ -111,6 +115,8 @@ void MainWidget::appConfig()
     _week = _settings.value("week", 1).toInt();
     _showEmptyLessons = _settings.value("showEmptyLessons", false).toBool();
     _currentTheme = _settings.value("theme", THEME_SYSTEM).toInt();
+
+
     this->move(_settings.value("position", this->pos()).toPoint());
     this->resize(_settings.value("geometry", this->size()).toSize());
     this->resize(this->size());
@@ -150,6 +156,10 @@ void MainWidget::saveSettingsFromTab()
 
     _date = QDateTime::currentDateTime().date();
     _showEmptyLessons = settings->getShowEmptyLessons();
+
+    _settings.beginGroup("/Settings");
+    _settings.setValue("groupIndex", _groupIndex);
+    _settings.endGroup();
 
     calulateCurrentWeekNumber();
 }
@@ -300,7 +310,6 @@ void MainWidget::slotSettingsButtonClicked()
 {
     if (_currentTabIndex == SETTINGS_TAB_INDEX) return;
 
-
     QWidget* oldWidget = _mainLayout->itemAt(0)->widget();
     if (oldWidget) {
         _mainLayout->removeWidget(oldWidget);
@@ -316,4 +325,11 @@ void MainWidget::slotSettingsButtonClicked()
 
     _currentTabIndex = SETTINGS_TAB_INDEX;
     updateTabBarButtons();
+}
+
+void MainWidget::refreshSettingsTab()
+{
+    saveSettingsFromTab();
+    _currentTabIndex = -1;
+    slotSettingsButtonClicked();
 }

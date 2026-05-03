@@ -742,20 +742,12 @@ CMakeFiles\Vega.dir\UI\ScheduleTab.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qstringmatcher.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QStringList \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QByteArray \
-  C:\Users\ADMIN\Documents\vega\src\UI\CustomElements.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QWidget \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qwidget.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qtwidgetsglobal.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtguiglobal.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtgui-config.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtguiexports.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qtwidgets-config.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qtwidgetsexports.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qwindowdefs.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QSettings \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsettings.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobject.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobjectdefs.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobjectdefs_impl.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qfunctionaltools_impl.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobject.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qscopedpointer.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmetatype.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdatastream.h \
@@ -776,10 +768,35 @@ CMakeFiles\Vega.dir\UI\ScheduleTab.cpp.o: \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\chrono \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__chrono\file_clock.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\forward_list \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmargins.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcheckedint_impl.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvariant.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdebug.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtextstream.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcontiguouscache.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsharedpointer.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qshareddata.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsharedpointer_impl.h \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\set \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\unordered_set \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmap.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qshareddata_impl.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qset.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qhash.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvarlengtharray.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qalloc.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\q23utility.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\q20utility.h \
+  C:\Users\ADMIN\Documents\vega\src\UI\CustomElements.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QWidget \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qwidget.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qtwidgetsglobal.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtguiglobal.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtgui-config.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtguiexports.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qtwidgets-config.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qtwidgetsexports.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qwindowdefs.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmargins.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcheckedint_impl.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qaction.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qkeysequence.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qicon.h \
@@ -791,7 +808,6 @@ CMakeFiles\Vega.dir\UI\ScheduleTab.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qcolor.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qrgb.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qrgba64.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qshareddata.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qimage.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qpixelformat.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qtransform.h \
@@ -801,20 +817,6 @@ CMakeFiles\Vega.dir\UI\ScheduleTab.cpp.o: \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\cassert \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\q20iterator.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qline.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvariant.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdebug.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtextstream.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcontiguouscache.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsharedpointer.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsharedpointer_impl.h \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\set \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\unordered_set \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmap.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qshareddata_impl.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qset.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qhash.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvarlengtharray.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qalloc.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qpalette.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qbrush.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtGui\qfont.h \

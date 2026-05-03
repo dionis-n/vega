@@ -741,6 +741,49 @@ CMakeFiles\Vega.dir\Backend\Parser.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qstringmatcher.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QStringList \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QByteArray \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QSettings \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsettings.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobject.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobjectdefs.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobjectdefs_impl.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qfunctionaltools_impl.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qscopedpointer.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmetatype.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdatastream.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qiodevicebase.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qfloat16.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmath.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtformat_impl.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qiterable.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtaggedpointer.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmetacontainer.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcontainerinfo.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qscopeguard.h \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\list \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\map \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__tree \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobject_impl.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qbindingstorage.h \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\chrono \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__chrono\file_clock.h \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\forward_list \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvariant.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdebug.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtextstream.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcontiguouscache.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsharedpointer.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qshareddata.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsharedpointer_impl.h \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\set \
+  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\unordered_set \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmap.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qshareddata_impl.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qset.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qhash.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvarlengtharray.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qalloc.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\q23utility.h \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\q20utility.h \
   C:\Users\ADMIN\Documents\vega\src\Backend\OpenXLSX\OpenXLSX.hpp \
   C:\Users\ADMIN\Documents\vega\src\Backend\OpenXLSX\headers\XLCell.hpp \
   C:\Users\ADMIN\Documents\vega\src\build\WebAssembly_Qt_6_11_0_single_threaded-u041eu0442u043bu0430u0434u043au0430\Backend\OpenXLSX\OpenXLSX-Exports.hpp \
@@ -780,7 +823,6 @@ CMakeFiles\Vega.dir\Backend\Parser.cpp.o: \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__filesystem\file_type.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__filesystem\perms.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__filesystem\file_time_type.h \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__chrono\file_clock.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__filesystem\filesystem_error.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__filesystem\path.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\iomanip \
@@ -792,14 +834,9 @@ CMakeFiles\Vega.dir\Backend\Parser.cpp.o: \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__filesystem\path_iterator.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__filesystem\recursive_directory_iterator.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__filesystem\u8path.h \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\list \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\map \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\__tree \
   C:\Users\ADMIN\Documents\vega\src\Backend\OpenXLSX\headers\IZipArchive.hpp \
   C:\Users\ADMIN\Documents\vega\src\Backend\OpenXLSX\headers\XLCommandQuery.hpp \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\any \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\chrono \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\forward_list \
   C:\Users\ADMIN\Documents\vega\src\Backend\OpenXLSX\headers\XLXmlData.hpp \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\sstream \
   C:\Users\ADMIN\Documents\vega\src\Backend\OpenXLSX\headers\XLContentTypes.hpp \
@@ -816,24 +853,6 @@ CMakeFiles\Vega.dir\Backend\Parser.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qfile.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qfiledevice.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qiodevice.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qiodevicebase.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobject.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobjectdefs.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobjectdefs_impl.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qfunctionaltools_impl.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qscopedpointer.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmetatype.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdatastream.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qfloat16.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmath.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtformat_impl.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qiterable.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtaggedpointer.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmetacontainer.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcontainerinfo.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qscopeguard.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qobject_impl.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qbindingstorage.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qspan.h \
   C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\cassert \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\q20iterator.h \
@@ -841,29 +860,12 @@ CMakeFiles\Vega.dir\Backend\Parser.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qxmlstream.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QXmlStreamReader \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QDebug \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdebug.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtextstream.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcontiguouscache.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsharedpointer.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qshareddata.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsharedpointer_impl.h \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\set \
-  C:\emsdk\upstream\emscripten\cache\sysroot\include\c++\v1\unordered_set \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qmap.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qshareddata_impl.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qset.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qhash.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvarlengtharray.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qalloc.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QDir \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdir.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdirlisting.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qdatetime.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qcalendar.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qlocale.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvariant.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\q23utility.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\q20utility.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qfileinfo.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtimezone.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QDateTime \

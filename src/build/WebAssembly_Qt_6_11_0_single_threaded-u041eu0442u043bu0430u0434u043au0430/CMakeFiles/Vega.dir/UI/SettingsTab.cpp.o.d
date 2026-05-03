@@ -902,6 +902,8 @@ CMakeFiles\Vega.dir\UI\SettingsTab.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QVector \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qvector.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QByteArray \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QSettings \
+  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsettings.h \
   C:\Users\ADMIN\Documents\vega\src\UI\CustomElements.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QPushButton \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qpushbutton.h \
@@ -940,7 +942,5 @@ CMakeFiles\Vega.dir\UI\SettingsTab.cpp.o: \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QSizePolicy \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\QApplication \
   C:\Qt\6.11.0\wasm_singlethread\include\QtWidgets\qapplication.h \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QSettings \
-  C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qsettings.h \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\QTimer \
   C:\Qt\6.11.0\wasm_singlethread\include\QtCore\qtimer.h
