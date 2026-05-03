@@ -130,35 +130,17 @@ void MainWidget::saveSettingsFromTab()
 {
     SettingsTab* settings = qobject_cast<SettingsTab*>(_mainLayout->itemAt(0)->widget());
 
-    /*if (settings->getShowEmptyLessons() != _showEmptyLessons)
-    {
-        if (_showEmptyLessons)
-        {
-            this->setFixedHeight(this->height() - EXTRA_SIZE);
-        }
-        else
-        {
-            this->setFixedHeight(this->height() + EXTRA_SIZE);
-        }
-    }*/
-
     _groupIndex = settings->getGroupIndex();
     _subgroup = settings->getSubgroup();
-
-    if (QDateTime::currentDateTime().date().dayOfWeek() == Qt::Sunday && settings->getWeek() == _currentWeekNumber)
-    {
-        _week = settings->getWeek() - 1;
-    }
-    else
-    {
-        _week = settings->getWeek();
-    }
-
-    _date = QDateTime::currentDateTime().date();
+    _week = settings->getWeek();
     _showEmptyLessons = settings->getShowEmptyLessons();
 
     _settings.beginGroup("/Settings");
     _settings.setValue("groupIndex", _groupIndex);
+    _settings.setValue("subgroup", _subgroup);
+    _settings.setValue("week", _week);
+    _settings.setValue("showEmptyLessons", _showEmptyLessons);
+    _settings.setValue("date", _date);
     _settings.endGroup();
 
     calulateCurrentWeekNumber();
@@ -169,11 +151,6 @@ void MainWidget::calulateCurrentWeekNumber()
     QDate currentDate = QDateTime::currentDateTime().date();
 
     _currentWeekNumber = currentDate.weekNumber() - _date.weekNumber() + _week;
-
-    if (currentDate.dayOfWeek() == 7)
-    {
-        ++_currentWeekNumber;
-    }
 
     if (_currentWeekNumber < 1 || _currentWeekNumber > MAX_WEEK_NUMBER)
     {
@@ -332,4 +309,11 @@ void MainWidget::refreshSettingsTab()
     saveSettingsFromTab();
     _currentTabIndex = -1;
     slotSettingsButtonClicked();
+}
+
+void MainWidget::saveSetting(const QString& key, int value)
+{
+    _settings.beginGroup("/Settings");
+    _settings.setValue(key, value);
+    _settings.endGroup();
 }

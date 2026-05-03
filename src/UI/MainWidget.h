@@ -47,6 +47,7 @@ public:
     void switchToSchedule();
 
     void refreshSettingsTab();
+    void saveSetting(const QString& key, int value);
 
 private:
     QHBoxLayout* createTabBarLayout();
