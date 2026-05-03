@@ -67,7 +67,9 @@ SettingsTab::SettingsTab(const QStringList& groups, int groupIndex, int subgroup
 
     subgroupComboBox->addItems( {"1", "2"} );
     showEmptyLessonsComboBox->addItems( {"Нет", "Да"} );
+    themeComboBox->blockSignals(true);
     themeComboBox->addItems( {"Системная", "Светлая", "Тёмная"} );
+    themeComboBox->blockSignals(false);
 
     for (int i = 1; i < maxWeekNumber + 1; ++i)
     {
@@ -79,8 +81,11 @@ SettingsTab::SettingsTab(const QStringList& groups, int groupIndex, int subgroup
     weekComboBox->setCurrentIndex(week - 1);
     showEmptyLessonsComboBox->setCurrentIndex( int(showEmptyLessons) );
 
-    MainWidget* mainWindow = qobject_cast<MainWidget*>(parent);
-    int savedTheme = mainWindow ? mainWindow->getCurrentTheme() : 0;
+
+    QSettings themeSettings;
+    themeSettings.beginGroup("/Settings");
+    int savedTheme = themeSettings.value("theme", THEME_SYSTEM).toInt();
+    themeSettings.endGroup();
     themeComboBox->blockSignals(true);
     themeComboBox->setCurrentIndex(savedTheme);
     themeComboBox->blockSignals(false);
@@ -150,6 +155,8 @@ void SettingsTab::onThemeChanged(int index)
     MainWidget* mainWindow = qobject_cast<MainWidget*>(parentWidget());
     if (mainWindow) {
         mainWindow->setTheme(index);
+        mainWindow->saveSetting("theme", index);
+        qDebug() << "onThemeChanged:" << index;
     }
 }
 

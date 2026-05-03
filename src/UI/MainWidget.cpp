@@ -205,31 +205,27 @@ void MainWidget::slotCheckSystemTheme()
 
     QColor backgroundColor = QWidget::palette().color(QWidget::backgroundRole());
 
-    std::array<int, 3> color;
-    color[0] = backgroundColor.red();
-    color[1] = backgroundColor.green();
-    color[2] = backgroundColor.blue();
 
-    int count = 0;
+    int brightness = (backgroundColor.red() + backgroundColor.green() + backgroundColor.blue()) / 3;
 
-    for (auto&& item : color)
-    {
-        count += (item > 150) ? 1 : 0;
-    }
 
-    if (count < 2 && (_appTheme == LIGHT_THEME || _appTheme == START_UP_THEME))
+    bool force = (_appTheme == START_UP_THEME);
+
+    if (brightness < 128 && (force || _appTheme == LIGHT_THEME))
     {
         QFile style(":/dark_theme.qss");
-        style.open(QFile::ReadOnly);
-        qApp->setStyleSheet(style.readAll());
-        _appTheme = DARK_THEME;
+        if (style.open(QFile::ReadOnly)) {
+            qApp->setStyleSheet(style.readAll());
+            _appTheme = DARK_THEME;
+        }
     }
-    else if (count > 2 && (_appTheme == DARK_THEME || _appTheme == START_UP_THEME))
+    else if (brightness >= 128 && (force || _appTheme == DARK_THEME))
     {
         QFile style(":/light_theme.qss");
-        style.open(QFile::ReadOnly);
-        qApp->setStyleSheet(style.readAll());
-        _appTheme = LIGHT_THEME;
+        if (style.open(QFile::ReadOnly)) {
+            qApp->setStyleSheet(style.readAll());
+            _appTheme = LIGHT_THEME;
+        }
     }
 }
 
@@ -256,6 +252,7 @@ void MainWidget::setTheme(int themeIndex)
     }
     case THEME_SYSTEM:
     default: {
+        qApp->setStyleSheet("");
         _appTheme = START_UP_THEME;
         slotCheckSystemTheme();
         break;
