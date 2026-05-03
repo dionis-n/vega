@@ -120,21 +120,29 @@ bool SettingsTab::getShowEmptyLessons() const
 void SettingsTab::slotGroup(int index)
 {
     _groupIndex = index;
+    MainWidget* mw = qobject_cast<MainWidget*>(parentWidget());
+    if (mw) mw->saveSetting("groupIndex", index);
 }
 
 void SettingsTab::slotSubgroup(int index)
 {
     _subgroup = index + 1;
+    MainWidget* mw = qobject_cast<MainWidget*>(parentWidget());
+    if (mw) mw->saveSetting("subgroup", index + 1);
 }
 
 void SettingsTab::slotWeek(int index)
 {
     _week = index + 1;
+    MainWidget* mw = qobject_cast<MainWidget*>(parentWidget());
+    if (mw) mw->saveSetting("week", index + 1);
 }
 
 void SettingsTab::slotShowEmptyLessons(int index)
 {
     _showEmptyLessons = index;
+    MainWidget* mw = qobject_cast<MainWidget*>(parentWidget());
+    if (mw) mw->saveSetting("showEmptyLessons", index);
 }
 
 void SettingsTab::onThemeChanged(int index)
