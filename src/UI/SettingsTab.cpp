@@ -39,6 +39,18 @@ SettingsTab::SettingsTab(const QStringList& groups, int groupIndex, int subgroup
         _statusLabel->setText(msg);
         _statusLabel->setStyleSheet(success ? "color: green; font-weight: bold;" : "color: red; font-weight: bold;");
         _statusLabel->setVisible(true);
+    } else {
+        // Проверяем, есть ли расписание
+        QStringList existingGroups = Parser::groups("", "");
+        if (existingGroups.isEmpty()) {
+            _statusLabel->setText("Файл не выбран");
+            _statusLabel->setStyleSheet("color: red; font-weight: bold;");
+            _statusLabel->setVisible(true);
+        } else {
+            _statusLabel->setText("Расписание загружено");
+            _statusLabel->setStyleSheet("color: green; font-weight: bold;");
+            _statusLabel->setVisible(true);
+        }
     }
     settings.endGroup();
 
@@ -170,6 +182,12 @@ void SettingsTab::onLoadFileClicked()
             settings.setValue("statusMessage", "Расписание загружено");
             settings.setValue("statusSuccess", true);
             settings.endGroup();
+
+            settings.beginGroup("/Settings");
+            settings.setValue("groupIndex", currentGroupIndex);
+            settings.endGroup();
+
+            mainWindow->refreshSettingsTab();
         }
         );
 }

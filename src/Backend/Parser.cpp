@@ -208,19 +208,9 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
 void Parser::writeXML(const QString& directory, const QString& fileNameXML)
 {
     qDebug() << "=== writeXML START ===";
-    QDir dir(directory);
-    if (!dir.exists() && !dir.mkpath(".")) {
-        qDebug() << "Ошибка создания директории:" << directory;
-        return;
-    }
 
-    QFile file(directory + "/" + fileNameXML);
-    if (!file.open(QIODevice::WriteOnly)) {
-        qDebug() << "Failed to open XML for writing:" << fileNameXML;
-        return;
-    }
-
-    QXmlStreamWriter stream(&file);
+    QString xmlString;
+    QXmlStreamWriter stream(&xmlString);
     stream.setAutoFormatting(true);
     stream.writeStartDocument();
     stream.writeStartElement("schedule");
@@ -231,7 +221,6 @@ void Parser::writeXML(const QString& directory, const QString& fileNameXML)
     }
     stream.writeEndElement();
 
-    // Сохраняем расписание для каждой группы
     for (int gIdx = 0; gIdx < _allGroupsSchedule.size(); ++gIdx) {
         stream.writeStartElement("groupSchedule");
         stream.writeAttribute("index", QString::number(gIdx));
@@ -256,7 +245,12 @@ void Parser::writeXML(const QString& directory, const QString& fileNameXML)
 
     stream.writeEndElement();
     stream.writeEndDocument();
-    file.close();
+
+    QSettings settings;
+    settings.beginGroup("/Schedule");
+    settings.setValue("xml", xmlString);
+    settings.endGroup();
+
     qDebug() << "=== writeXML FINISH ===";
 }
 
@@ -264,15 +258,20 @@ QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QStrin
                                            int userSubgroup, int userWeek, int groupIndex)
 {
     QVector<QVector<Lesson*>> schedule(6);
-    QFile file(directory + "/" + fileNameXML);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "ERROR: Cannot open XML file for reading";
+
+    QSettings settings;
+    settings.beginGroup("/Schedule");
+    QString xmlString = settings.value("xml").toString();
+    settings.endGroup();
+
+    if (xmlString.isEmpty()) {
+        qDebug() << "ERROR: No schedule data in QSettings";
         return schedule;
     }
 
     const int userWeekParity = (userWeek % 2 == 1) ? 1 : 2;
 
-    QXmlStreamReader stream(&file);
+    QXmlStreamReader stream(xmlString);
     QString number, name, cabinet, curType;
     int dayIndex = -1;
     int curSubgroup = 0;
@@ -325,19 +324,23 @@ QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QStrin
             }
         }
     }
-    file.close();
     return schedule;
 }
 
 QStringList Parser::groups(const QString& directory, const QString& fileNameXML)
 {
     QStringList result;
-    QFile file(directory + "/" + fileNameXML);
-    if (!file.open(QIODevice::ReadOnly)) {
+
+    QSettings settings;
+    settings.beginGroup("/Schedule");
+    QString xmlString = settings.value("xml").toString();
+    settings.endGroup();
+
+    if (xmlString.isEmpty()) {
         return result;
     }
 
-    QXmlStreamReader stream(&file);
+    QXmlStreamReader stream(xmlString);
     bool inGroups = false;
 
     while (!stream.atEnd() && !stream.hasError()) {
@@ -356,6 +359,5 @@ QStringList Parser::groups(const QString& directory, const QString& fileNameXML)
             break;
         }
     }
-    file.close();
     return result;
 }

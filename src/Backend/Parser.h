@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QStringList>
 #include <QByteArray>
+#include <QSettings>
 
 struct Lesson
 {
