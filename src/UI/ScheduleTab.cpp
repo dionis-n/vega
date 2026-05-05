@@ -17,6 +17,7 @@ ScheduleTab::ScheduleTab(const QVector<QVector<Lesson*>>& schedule, bool showEmp
     }
 
     setLayout(_scheduleTabLayout);
+
 }
 
 ScheduleTab::~ScheduleTab()
@@ -69,7 +70,8 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     }
     else
     {
-        time = _lessonTime[lesson->_number - 1];
+        if (lesson -> _name != "НИР")
+            time = _lessonTime[lesson->_number - 1];
     }
 
     QLabel* timeLabel = new QLabel(time.trimmed());
@@ -86,14 +88,14 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     nameLabel->setMinimumWidth(0);
 
-    // Кружочек
+    // Виджет типа пары
     lessonTypeBadge* badge = nullptr;
     if (!lesson->_type.isEmpty())
     {
         badge = new lessonTypeBadge(lesson->_type);
     }
 
-    // Контейнер: кружочек + название
+    // Контейнер: виджет типа пары + название
     QWidget* nameContainer = new QWidget();
     nameContainer->setMinimumWidth(0);
     QHBoxLayout* nameLayout = new QHBoxLayout(nameContainer);
@@ -107,7 +109,8 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
         nameLayout->addSpacing(10);
     }
     nameLayout->addWidget(nameLabel);
-    //nameLayout->addStretch();
+    if (lesson->_name == "НИР")
+        nameLayout->setAlignment(Qt::AlignVCenter);
 
     // Кабинет
     QLabel* cabinetLabel = new QLabel(lesson->_cabinet);

@@ -26,7 +26,7 @@ enum
     THEME_LIGHT = 1,
     THEME_DARK = 2,
 
-    MAX_WEEK_NUMBER = 20,
+    MAX_WEEK_NUMBER = 16,
 
     EXTRA_SIZE = 120
 };

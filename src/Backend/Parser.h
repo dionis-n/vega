@@ -13,7 +13,8 @@ struct Lesson
     QString _cabinet;
     int _subgroup = 0;
     int _weekParity = 0;
-    QString _type;         // "лк", "пр"
+    QString _type;
+    QList<int> _weeks;
 };
 
 class Parser {
@@ -26,7 +27,7 @@ public:
     static QStringList groups(const QString& directory, const QString& fileName);
 
 private:
-    QVector<QVector<Lesson*>> _rawSchedule;  // 6 дней
+    QVector<QVector<Lesson*>> _rawSchedule;
     QVector<QVector<QVector<Lesson*>>> _allGroupsSchedule;
     QStringList _groups;
 };
