@@ -7,16 +7,34 @@
 #include <QDir>
 #include <QDateTime>
 #include <QRegularExpression>
+#include <algorithm>
 
 using namespace OpenXLSX;
 
 static const QRegularExpression reLecture(QStringLiteral(R"(\s*лк\s*)"));
+static const QRegularExpression reSpecificWeeks(QStringLiteral(R"((\d+(?:,\d+)*)\s*н\.?)"));
 
-// Функция определения типа занятия
 static QString extractLessonType(const QString& raw) {
     if (raw.contains(reLecture)) return "лк";
     if (!raw.isEmpty()) return "пр";
     return QString();
+}
+
+static QList<int> extractSpecificWeeks(const QString& raw) {
+    QList<int> weeks;
+    QRegularExpressionMatchIterator it = reSpecificWeeks.globalMatch(raw);
+    while (it.hasNext()) {
+        QRegularExpressionMatch match = it.next();
+        QStringList parts = match.captured(1).split(",");
+        for (const QString& p : parts) {
+            bool ok;
+            int w = p.trimmed().toInt(&ok);
+            if (ok && w >= 1 && w <= 20 && !weeks.contains(w))
+                weeks.append(w);
+        }
+    }
+    std::sort(weeks.begin(), weeks.end());
+    return weeks;
 }
 
 static QString getCellString(const XLCell& cell) {
@@ -52,21 +70,18 @@ static QString getCellString(const XLCell& cell) {
     return QString();
 }
 
-// Вспомогательная функция для очистки названия предмета
 static QString cleanSubjectName(const QString& raw) {
     QString cleaned = raw;
     cleaned.remove(QRegularExpression(R"(\s*\([12]пг\)\s*)"));
     cleaned.remove(QRegularExpression(R"(\s*\([12]\*пг\)\s*)"));
     cleaned.remove(QRegularExpression(R"(\s*[III]+\s*н\s*)"));
     cleaned.remove(QRegularExpression(R"(\s*лк\s*)"));
+    cleaned.remove(reSpecificWeeks);
     return cleaned.trimmed();
 }
 
 void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
 {
-    qDebug() << "=== loadXLSXFromMemory START ===";
-    qDebug() << "Data size:" << data.size() << "groupIndex:" << groupIndex;
-
     _rawSchedule.clear();
     _rawSchedule.resize(6);
     _allGroupsSchedule.clear();
@@ -82,7 +97,6 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
     auto wb = doc.workbook();
     auto ws = wb.worksheet("Занятия");
 
-    // Сбор списка групп из строки 2
     static const QRegularExpression hasCyrillic(QStringLiteral("[А-Яа-я]"));
     for (int col = 3; col < 200; col += 3) {
         QString g = getCellString(ws.cell(2, col)).trimmed();
@@ -90,20 +104,16 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
         if (!g.contains(hasCyrillic)) break;
         _groups.append(g);
     }
-    qDebug() << "Найдено групп:" << _groups.size() << _groups;
 
     if (groupIndex < 0 || groupIndex >= _groups.size()) {
-        qDebug() << "Внимание: groupIndex вне диапазона, использую 0";
         groupIndex = 0;
     }
 
-    // Инициализируем хранилище для всех групп
     _allGroupsSchedule.resize(_groups.size());
     for (auto& dayVec : _allGroupsSchedule) {
         dayVec.resize(6);
     }
 
-    // Парсим расписание для каждой группы
     for (int gIdx = 0; gIdx < _groups.size(); ++gIdx) {
         int groupColumn = 3 + gIdx * 3;
 
@@ -167,12 +177,14 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
             }
 
             int subgroup = 0;
-            if (rawSubject.contains(reSubgroup1))      subgroup = 1;
+            if (rawSubject.contains(reSubgroup1))   subgroup = 1;
             else if (rawSubject.contains(reSubgroup2)) subgroup = 2;
 
             int weekParity = 0;
-            if (rawSubject.contains(reEvenWeek))     weekParity = 2;
+            if (rawSubject.contains(reEvenWeek))    weekParity = 2;
             else if (rawSubject.contains(reOddWeek)) weekParity = 1;
+
+            QList<int> specificWeeks = extractSpecificWeeks(rawSubject);
 
             QString lessonType = extractLessonType(rawSubject);
 
@@ -190,25 +202,19 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
             lesson->_subgroup = subgroup;
             lesson->_weekParity = weekParity;
             lesson->_type = lessonType;
+            lesson->_weeks = specificWeeks;
 
             _allGroupsSchedule[gIdx][currentDay].append(lesson);
         }
     }
 
-    // Копируем расписание выбранной группы в _rawSchedule для обратной совместимости
     _rawSchedule = _allGroupsSchedule[groupIndex];
 
     doc.close();
-    qDebug() << "=== loadXLSXFromMemory FINISH ===";
-    for (int i = 0; i < _rawSchedule.size(); ++i) {
-        qDebug() << "День" << i << "занятий:" << _rawSchedule[i].size();
-    }
 }
 
 void Parser::writeXML(const QString& directory, const QString& fileNameXML)
 {
-    qDebug() << "=== writeXML START ===";
-
     QString xmlString;
     QXmlStreamWriter stream(&xmlString);
     stream.setAutoFormatting(true);
@@ -232,6 +238,11 @@ void Parser::writeXML(const QString& directory, const QString& fileNameXML)
                 stream.writeAttribute("subgroup", QString::number(lesson->_subgroup));
                 stream.writeAttribute("weekParity", QString::number(lesson->_weekParity));
                 stream.writeAttribute("type", lesson->_type);
+                if (!lesson->_weeks.isEmpty()) {
+                    QStringList w;
+                    for (int ww : lesson->_weeks) w << QString::number(ww);
+                    stream.writeAttribute("weeks", w.join(","));
+                }
                 stream.writeTextElement("number", QString::number(lesson->_number));
                 stream.writeTextElement("name", lesson->_name);
                 stream.writeTextElement("cabinet", lesson->_cabinet);
@@ -250,8 +261,6 @@ void Parser::writeXML(const QString& directory, const QString& fileNameXML)
     settings.beginGroup("/Schedule");
     settings.setValue("xml", xmlString);
     settings.endGroup();
-
-    qDebug() << "=== writeXML FINISH ===";
 }
 
 QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QString& fileNameXML,
@@ -278,6 +287,7 @@ QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QStrin
     int curWeekParity = 0;
     bool inDay = false;
     int currentGroupIdx = -1;
+    QList<int> curWeeks;
 
     while (!stream.atEnd() && !stream.hasError()) {
         stream.readNext();
@@ -293,6 +303,12 @@ QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QStrin
                 curSubgroup = stream.attributes().value("subgroup").toInt();
                 curWeekParity = stream.attributes().value("weekParity").toInt();
                 curType = stream.attributes().value("type").toString();
+                QString weeksStr = stream.attributes().value("weeks").toString();
+                curWeeks.clear();
+                if (!weeksStr.isEmpty()) {
+                    for (const QString& w : weeksStr.split(","))
+                        curWeeks.append(w.toInt());
+                }
                 number.clear();
                 name.clear();
                 cabinet.clear();
@@ -310,6 +326,7 @@ QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QStrin
                 bool keep = true;
                 if (curSubgroup != 0 && curSubgroup != userSubgroup) keep = false;
                 if (curWeekParity != 0 && curWeekParity != userWeekParity) keep = false;
+                if (!curWeeks.isEmpty() && !curWeeks.contains(userWeek)) keep = false;
 
                 if (keep) {
                     Lesson* lesson = new Lesson();
@@ -319,6 +336,7 @@ QVector<QVector<Lesson*>> Parser::readXML(const QString& directory, const QStrin
                     lesson->_subgroup = curSubgroup;
                     lesson->_weekParity = curWeekParity;
                     lesson->_type = curType;
+                    lesson->_weeks = curWeeks;
                     schedule[dayIndex].append(lesson);
                 }
             }

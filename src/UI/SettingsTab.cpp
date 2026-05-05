@@ -156,7 +156,6 @@ void SettingsTab::onThemeChanged(int index)
     if (mainWindow) {
         mainWindow->setTheme(index);
         mainWindow->saveSetting("theme", index);
-        qDebug() << "onThemeChanged:" << index;
     }
 }
 

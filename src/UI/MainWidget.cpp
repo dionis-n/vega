@@ -7,15 +7,6 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent), _mainLayout(new QVBox
 {
     appConfig();
 
-    /*if (_showEmptyLessons)
-    {
-        this->setFixedHeight(this->height() + EXTRA_SIZE);
-    }
-    else
-    {
-        this->setFixedHeight(this->height());
-    }*/
-
     slotCheckSystemTheme();
 
     QStringList groups = Parser::groups(_standardPath, _fileNameXML);
@@ -177,7 +168,6 @@ void MainWidget::closeEvent(QCloseEvent* event)
 
     if (_showEmptyLessons)
     {
-        //this->setFixedHeight(this->height() - EXTRA_SIZE);
         _settings.setValue("geometry", this->size());
     }
     else
@@ -271,7 +261,6 @@ void MainWidget::switchToSchedule()
         oldWidget->deleteLater();
     }
 
-    // Передаём groupIndex при чтении
     auto schedule = Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber, _groupIndex);
     ScheduleTab* scheduleTab = new ScheduleTab(schedule, _showEmptyLessons, this);
     _mainLayout->insertWidget(0, scheduleTab);
