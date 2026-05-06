@@ -40,7 +40,6 @@ SettingsTab::SettingsTab(const QStringList& groups, int groupIndex, int subgroup
         _statusLabel->setStyleSheet(success ? "color: green; font-weight: bold;" : "color: red; font-weight: bold;");
         _statusLabel->setVisible(true);
     } else {
-        // Проверяем, есть ли расписание
         QStringList existingGroups = Parser::groups("", "");
         if (existingGroups.isEmpty()) {
             _statusLabel->setText("Файл не выбран");
