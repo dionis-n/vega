@@ -17,6 +17,7 @@ ScheduleTab::ScheduleTab(const QVector<QVector<Lesson*>>& schedule, bool showEmp
     }
 
     setLayout(_scheduleTabLayout);
+
 }
 
 ScheduleTab::~ScheduleTab()
@@ -34,6 +35,7 @@ ScheduleTab::~ScheduleTab()
 
 QHBoxLayout* ScheduleTab::createDayBarLayout() {
     QHBoxLayout* dayBarLayout = new QHBoxLayout();
+    dayBarLayout->setSpacing(0);
 
     for (int i = 0; i < _dayName.size(); ++i)
     {
@@ -48,14 +50,93 @@ QHBoxLayout* ScheduleTab::createDayBarLayout() {
     return dayBarLayout;
 }
 
+QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
+{
+    QWidget* row = new QWidget();
+    row->setObjectName("lessonCard");
+    row->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    row->setMinimumHeight(40);
+    row->setMinimumWidth(0);
+
+    QHBoxLayout* rowLayout = new QHBoxLayout(row);
+    rowLayout->setContentsMargins(8, 2, 8, 2);
+    rowLayout->setSpacing(0);
+
+    // Время
+    QString time;
+    if (_wideMode)
+    {
+        time = QString::number(lesson->_number) + ". ";
+    }
+    else
+    {
+        if (lesson -> _name != "НИР")
+            time = _lessonTime[lesson->_number - 1];
+        else
+            time = "         \n         ";
+    }
+
+    //QLabel* timeLabel = new QLabel(time.trimmed());
+    QLabel* timeLabel = new QLabel(time);
+    timeLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    timeLabel->setStyleSheet("font-size: 15px;");
+    timeLabel->setMinimumWidth(0);
+
+    // Название
+    QLabel* nameLabel = new QLabel(lesson->_name);
+    nameLabel->setWordWrap(true);
+    nameLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    nameLabel->setStyleSheet("font-weight: bold;");
+    nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    nameLabel->setMinimumWidth(0);
+
+    // Виджет типа пары
+    lessonTypeBadge* badge = nullptr;
+    if (!lesson->_type.isEmpty())
+    {
+        badge = new lessonTypeBadge(lesson->_type);
+    }
+
+    // Контейнер: виджет типа пары + название
+    QWidget* nameContainer = new QWidget();
+    nameContainer->setMinimumWidth(0);
+    QHBoxLayout* nameLayout = new QHBoxLayout(nameContainer);
+    nameLayout->setContentsMargins(0, 0, 0, 0);
+    nameLayout->setSpacing(0);
+
+    if (badge)
+    {
+
+        nameLayout->addWidget(badge, 0, Qt::AlignVCenter);
+        nameLayout->addSpacing(10);
+    }
+    nameLayout->addWidget(nameLabel);
+
+    // Кабинет
+    QLabel* cabinetLabel = new QLabel(lesson->_cabinet);
+    cabinetLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    cabinetLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    cabinetLabel->setStyleSheet("font-size: 15px;");
+    cabinetLabel->setMinimumWidth(0);
+
+    rowLayout->addWidget(timeLabel, 0, Qt::AlignVCenter);
+    rowLayout->addSpacing(10);
+    rowLayout->addWidget(nameContainer, 1);
+    rowLayout->addSpacing(8);
+    rowLayout->addWidget(cabinetLabel, 0, Qt::AlignVCenter);
+
+    return row;
+}
+
 QHBoxLayout* ScheduleTab::createWideLayout()
 {
     int weekday = getWeekdayNumber();
 
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(weekday)->widget() )
-            ->setChecked(true);
+        ->setChecked(true);
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(weekday)->widget() )
-            ->setDisabled(true);
+        ->setDisabled(true);
 
     _wideMode = true;
 
@@ -69,41 +150,31 @@ QHBoxLayout* ScheduleTab::createWideLayout()
         columnLayout->setAlignment(Qt::AlignTop);
 
         for (auto&& lesson : _schedule[i])
-        {            
+        {
             if (_showEmptyLessons)
             {
                 while (lastNumber != lesson->_number)
                 {
-                    scheduleLabel* label = new scheduleLabel( getFormatText(new Lesson{lastNumber,
-                                                                                       QString::fromStdString(""),
-                                                                                       QString::fromStdString("")}
-                                                                            ));
-                    label->setSizePolicy(QSizePolicy::Ignored , QSizePolicy::Ignored);
-                    columnLayout->addWidget(label);
+                    Lesson emptyLesson;
+                    emptyLesson._number = lastNumber;
+                    QWidget* row = createLessonRow(&emptyLesson);
+                    columnLayout->addWidget(row);
                     ++lastNumber;
                 }
             }
 
-            scheduleLabel* label = new scheduleLabel( getFormatText(lesson) );
-            label->setSizePolicy(QSizePolicy::Ignored , QSizePolicy::Ignored);
-            columnLayout->addWidget(label);
+            QWidget* row = createLessonRow(lesson);
+            columnLayout->addWidget(row);
             ++lastNumber;
         }
 
-        if (_schedule[i].length() == 0)
-        {
-            QLabel* hiddenLabel = new QLabel();
+        columnLayout->addStretch();
 
-            QSizePolicy policy = hiddenLabel->sizePolicy();
-            policy.setRetainSizeWhenHidden(true);
+        QWidget* columnWidget = new QWidget();
+        columnWidget->setMinimumWidth(0);
+        columnWidget->setLayout(columnLayout);
 
-            hiddenLabel->setSizePolicy(policy);
-            hiddenLabel->hide();
-
-            columnLayout->addWidget(hiddenLabel);
-        }
-
-        wideLayout->addLayout(columnLayout);
+        wideLayout->addWidget(columnWidget, 1);
     }
 
     return wideLayout;
@@ -115,9 +186,9 @@ QVBoxLayout* ScheduleTab::createNarrowLayout()
     int lastNumber = 1;
 
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(weekday)->widget() )
-            ->setChecked(true);
+        ->setChecked(true);
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(weekday)->widget() )
-            ->setDisabled(true);
+        ->setDisabled(true);
 
     _wideMode = false;
 
@@ -130,15 +201,16 @@ QVBoxLayout* ScheduleTab::createNarrowLayout()
         {
             while (lastNumber != lesson->_number)
             {
-                narrowLayout->addWidget(new scheduleLabel( getFormatText(new Lesson{lastNumber,
-                                                                                   QString::fromStdString(""),
-                                                                                   QString::fromStdString("")}
-                                                                         )));
+                Lesson emptyLesson;
+                emptyLesson._number = lastNumber;
+                QWidget* row = createLessonRow(&emptyLesson);
+                narrowLayout->addWidget(row);
                 ++lastNumber;
             }
         }
 
-        narrowLayout->addWidget(new scheduleLabel( getFormatText(lesson) ));
+        QWidget* row = createLessonRow(lesson);
+        narrowLayout->addWidget(row);
         ++lastNumber;
     }
 
@@ -152,30 +224,10 @@ QVBoxLayout* ScheduleTab::createNarrowLayout()
     return narrowLayout;
 }
 
-QString ScheduleTab::getFormatText(Lesson* lesson)
-{
-    QString time;
-
-    if (_wideMode)
-    {
-        time = QString::number(lesson->_number) + ". ";
-    }
-    else
-    {
-        time = _lessonTime[lesson->_number - 1] + "   ";
-    }
-
-    return QString("<table width=\"100%\">\
-                    <td width=\"10%\" valign=\"middle\" align=\"left\"><pre>%1</pre></td>\
-                    <td width=\"80%\" valign=\"middle\" align=\"left\"><pre>%2</pre></td>\
-                    <td width=\"10%\" valign=\"middle\" align=\"right\"><pre>%3</pre></td>\
-                    </table>").arg(time).arg(lesson->_name).arg(lesson->_cabinet);
-}
-
 int ScheduleTab::getWeekdayNumber()
 {
     QDateTime time;
-    int weekday = time.currentDateTime().date().dayOfWeek() - 1;    // monday = 0, tuesday = 1 ...
+    int weekday = time.currentDateTime().date().dayOfWeek() - 1;
 
     if (weekday == SUNDAY || weekday == NONE)
     {
@@ -197,43 +249,54 @@ int ScheduleTab::getWeekdayNumber()
 void ScheduleTab::resizeEvent(QResizeEvent* event) {
     if ( checkOrientation(this) )
     {
-        if (_wideMode)
+        if (_wideMode) return;
+
+        QLayout* oldLayout = _scheduleTabLayout->itemAt(1)->layout();
+        if (oldLayout)
         {
-            return;
+            QLayoutItem* item;
+            while ((item = oldLayout->takeAt(0)) != nullptr)
+            {
+                if (item->widget())
+                    item->widget()->deleteLater();
+                delete item;
+            }
+            oldLayout->deleteLater();
         }
-
-        QVBoxLayout* QLabelLayout = qobject_cast<QVBoxLayout*>( _scheduleTabLayout->itemAt(1)->layout() );
-
-        while ( !QLabelLayout->isEmpty() )
-        {
-            QLabelLayout->takeAt(0)->widget()->deleteLater();
-        }
-
-        QLabelLayout->deleteLater();
 
         _scheduleTabLayout->addLayout( createWideLayout() );
         _wideMode = true;
     }
     else
     {
-        if (!_wideMode)
-        {
-            return;
-        }
+        if (!_wideMode) return;
 
-        QHBoxLayout* QLabelLayout = qobject_cast<QHBoxLayout*>( _scheduleTabLayout->itemAt(1)->layout() );
-
-        while ( !QLabelLayout->isEmpty() )
+        QLayout* oldLayout = _scheduleTabLayout->itemAt(1)->layout();
+        if (oldLayout)
         {
-            while ( !QLabelLayout->itemAt(0)->layout()->isEmpty() )
+            QLayoutItem* item;
+            while ((item = oldLayout->takeAt(0)) != nullptr)
             {
-                QLabelLayout->itemAt(0)->layout()->takeAt(0)->widget()->deleteLater();
+                if (item->widget())
+                {
+                    QWidget* column = item->widget();
+                    QLayout* innerLayout = column->layout();
+                    if (innerLayout)
+                    {
+                        QLayoutItem* innerItem;
+                        while ((innerItem = innerLayout->takeAt(0)) != nullptr)
+                        {
+                            if (innerItem->widget())
+                                innerItem->widget()->deleteLater();
+                            delete innerItem;
+                        }
+                    }
+                    column->deleteLater();
+                }
+                delete item;
             }
-
-            QLabelLayout->takeAt(0)->layout()->deleteLater();
+            oldLayout->deleteLater();
         }
-
-        QLabelLayout->deleteLater();
 
         _scheduleTabLayout->addLayout( createNarrowLayout() );
         _wideMode = false;
@@ -242,29 +305,23 @@ void ScheduleTab::resizeEvent(QResizeEvent* event) {
 
 void ScheduleTab::slotDayButtonClicked()
 {
-    int weekday = qobject_cast<dayButton*>( sender() )->_weekday;    // weekday = button index
+    int weekday = qobject_cast<dayButton*>( sender() )->_weekday;
 
-    if (weekday == _currentWeekday)
-    {
-        return;
-    }
+    if (weekday == _currentWeekday) return;
 
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(_currentWeekday)->widget() )
-            ->setChecked(false);
+        ->setChecked(false);
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(_currentWeekday)->widget() )
-            ->setDisabled(false);
+        ->setDisabled(false);
 
     _currentWeekday = weekday;
 
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(weekday)->widget() )
-            ->setChecked(true);
+        ->setChecked(true);
     qobject_cast<dayButton*>( _scheduleTabLayout->itemAt(0)->layout()->itemAt(weekday)->widget() )
-            ->setDisabled(true);
+        ->setDisabled(true);
 
-    if (_wideMode)
-    {
-        return;
-    }
+    if (_wideMode) return;
 
     QVBoxLayout* narrowLayout = qobject_cast<QVBoxLayout*>( _scheduleTabLayout->itemAt(1)->layout() );
     narrowLayout->setAlignment(Qt::AlignTop);
@@ -282,15 +339,16 @@ void ScheduleTab::slotDayButtonClicked()
         {
             while (lastNumber != lesson->_number)
             {
-                narrowLayout->addWidget(new scheduleLabel( getFormatText(new Lesson{lastNumber,
-                                                                                   QString::fromStdString(""),
-                                                                                   QString::fromStdString("")}
-                                                                         )));
+                Lesson emptyLesson;
+                emptyLesson._number = lastNumber;
+                QWidget* row = createLessonRow(&emptyLesson);
+                narrowLayout->addWidget(row);
                 ++lastNumber;
             }
         }
 
-        narrowLayout->addWidget(new scheduleLabel( getFormatText(lesson) ));
+        QWidget* row = createLessonRow(lesson);
+        narrowLayout->addWidget(row);
         ++lastNumber;
     }
 

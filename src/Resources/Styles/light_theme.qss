@@ -1,41 +1,51 @@
-scheduleLabel 
-{
-    background-color: white;
+QHBoxLayout {
+    min-width: 0;
+}
+QComboBox, QPushButton {
+    min-width: 0;
+}
+
+QWidget {
+    background-color: #f0f0f0;
+    color: #3a3a3a;
+}
+
+QWidget#lessonCard {
+    background-color: #ffffff;
     border-radius: 20px;
     border-style: outset;
     padding: 5px;
     min-height: 40px;
+}
+
+QWidget#lessonCard QLabel {
+    color: #3a3a3a;
+    background: transparent;
+}
+
+dayButton {
+    background-color: #ffffff;
+    color: #3a3a3a;
+    border-radius: 20px;
+    border-style: outset;
+    min-width: 40px;
+    max-width: 40px;
+    min-height: 40px;
     max-height: 40px;
 }
 
-
-dayButton 
-{
-    background-color: white;
-    color: black;
-    border-radius: 25px;
+dayButton:checked {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border-radius: 20px;
     border-style: outset;
-    min-height: 50px;
-    max-height: 50px;
-    min-width: 50px;
-    max-width: 50px;
+    min-height: 40px;
+    max-height: 40px;
+    min-width: 40px;
+    max-width: 40px;
 }
 
-dayButton:checked 
-{
-    background-color: black;
-    color: white;
-    border-radius: 25px;
-    border-style: outset;
-    min-height: 50px;
-    max-height: 50px;
-    min-width: 50px;
-    max-width: 50px;
-}
-
-
-scheduleButton 
-{
+scheduleButton {
     border-image: url(:/Icons/Light/Resources/Icons/Light/schedule.svg);
     min-height: 48px;
     max-height: 48px;
@@ -43,18 +53,15 @@ scheduleButton
     max-width: 48px;
 }
 
-scheduleButton:checked 
-{
+scheduleButton:checked {
     border-image: url(:/Icons/Light/Resources/Icons/Light/schedule_fill.svg);
     min-height: 48px;
     max-height: 48px;
     min-width: 48px;
-    max-width: 48px;   
+    max-width: 48px;
 }
 
-
-settingsButton 
-{
+settingsButton {
     border-image: url(:/Icons/Light/Resources/Icons/Light/settings.svg);
     min-height: 48px;
     max-height: 48px;
@@ -62,11 +69,30 @@ settingsButton
     max-width: 48px;
 }
 
-settingsButton:checked 
-{
+settingsButton:checked {
     border-image: url(:/Icons/Light/Resources/Icons/Light/settings_fill.svg);
     min-height: 48px;
     max-height: 48px;
     min-width: 48px;
-    max-width: 48px;   
+    max-width: 48px;
+}
+
+lessonTypeBadge {
+    min-width: 20px;
+    max-width: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    border-radius: 10px;
+}
+
+QWidget#lessonCard QWidget {
+    background: transparent;
+}
+
+QWidget#lessonCard QWidget {
+    background: transparent;
+}
+
+QWidget#lessonCard {
+    min-width: 0;
 }

@@ -1,66 +1,42 @@
 #include "MainWidget.h"
+#include <QFileDialog>
+#include <QDebug>
+#include <QDir>
 
-MainWidget::MainWidget(QWidget* parent) : QWidget(parent), _mainLayout( new QVBoxLayout() )
+MainWidget::MainWidget(QWidget* parent) : QWidget(parent), _mainLayout(new QVBoxLayout())
 {
     appConfig();
 
-    if (_showEmptyLessons)
-    {
-        this->setFixedHeight( this->height() + EXTRA_SIZE );
-    }
-    else
-    {
-        this->setFixedHeight( this->height() );
-    }
-
-    Downloader downloader(_fileNameXLSX, _standardPath);
-    QString url;
-    Parser parser;
-
     slotCheckSystemTheme();
+
+    QStringList groups = Parser::groups(_standardPath, _fileNameXML);
+
     _timer = new QTimer(this);
-    connect(_timer, SIGNAL( timeout() ), this, SLOT( slotCheckSystemTheme() ));
+    connect(_timer, SIGNAL(timeout()), this, SLOT(slotCheckSystemTheme()));
     _timer->start(100);
 
-    try
+    if (!_settings.contains("/Settings/groupIndex"))
     {
-        url = downloader.getDownloadUrl();
-
-        if ( (_url != url || !_settings.contains("/Settings/url")) && !url.isEmpty() )
-        {
-            _url = url;
-            downloader.downloadFile(_url);
-
-            parser.readXLSX(_standardPath, _fileNameXLSX, _groupIndex);
-            parser.writeXML(_standardPath, _fileNameXML);
-        }
-    }
-    catch (...)
-    {}
-
-    if ( !_settings.contains("/Settings/groupIndex") && !_url.isEmpty() )
-    {
-        SettingsTab* settingsTab = new SettingsTab(Parser::groups(_standardPath, _fileNameXLSX), _groupIndex, _subgroup,
+        QStringList groups = Parser::groups(_standardPath, _fileNameXML);
+        SettingsTab* settingsTab = new SettingsTab(groups, _groupIndex, _subgroup,
                                                    _currentWeekNumber, MAX_WEEK_NUMBER, _showEmptyLessons, this);
         _mainLayout->addWidget(settingsTab);
         _currentTabIndex = SETTINGS_TAB_INDEX;
     }
     else
     {
-        ScheduleTab* scheduleTab = new ScheduleTab(parser.readXML(_standardPath, _fileNameXML, _subgroup,
-                                                                  _currentWeekNumber), _showEmptyLessons, this);
+        ScheduleTab* scheduleTab = new ScheduleTab(
+            Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber, _groupIndex),
+            _showEmptyLessons, this);
         _mainLayout->addWidget(scheduleTab);
         _currentTabIndex = SCHEDULE_TAB_INDEX;
     }
 
-    qobject_cast<QVBoxLayout*>(_mainLayout)->addLayout( createTabBarLayout() );
-
-    if ( _url.isEmpty() )
-    {
-        qobject_cast<settingsButton*>( _mainLayout->itemAt(1)->layout()->itemAt(SETTINGS_TAB_INDEX)->widget() )
-                                     ->setDisabled(true);
+    if (_currentTheme != THEME_SYSTEM) {
+        setTheme(_currentTheme);
     }
 
+    qobject_cast<QVBoxLayout*>(_mainLayout)->addLayout(createTabBarLayout());
     setLayout(_mainLayout);
 }
 
@@ -74,27 +50,39 @@ QHBoxLayout* MainWidget::createTabBarLayout()
 {
     QHBoxLayout* tabBarLayout = new QHBoxLayout();
 
-    scheduleButton* schedule = new scheduleButton();
-    connect(schedule, SIGNAL( clicked() ), SLOT( slotScheduleButtonClicked() ));
+    _scheduleBtn = new scheduleButton();
+    connect(_scheduleBtn, SIGNAL(clicked()), SLOT(slotScheduleButtonClicked()));
 
-    settingsButton* settings = new settingsButton();
-    connect(settings, SIGNAL( clicked() ), SLOT( slotSettingsButtonClicked() ));
+    _settingsBtn = new settingsButton();
+    connect(_settingsBtn, SIGNAL(clicked()), SLOT(slotSettingsButtonClicked()));
 
-    tabBarLayout->addWidget(schedule);
-    tabBarLayout->addWidget(settings);
+    tabBarLayout->addWidget(_scheduleBtn);
+    tabBarLayout->addWidget(_settingsBtn);
+
+    updateTabBarButtons();
+
+    return tabBarLayout;
+}
+
+void MainWidget::updateTabBarButtons()
+{
+    if (!_scheduleBtn || !_settingsBtn)
+        return;
 
     if (_currentTabIndex == SCHEDULE_TAB_INDEX)
     {
-        schedule->setChecked(true);
-        schedule->setDisabled(true);
+        _scheduleBtn->setChecked(true);
+        _scheduleBtn->setDisabled(true);
+        _settingsBtn->setChecked(false);
+        _settingsBtn->setDisabled(false);
     }
     else if (_currentTabIndex == SETTINGS_TAB_INDEX)
     {
-        settings->setChecked(true);
-        settings->setDisabled(true);
+        _settingsBtn->setChecked(true);
+        _settingsBtn->setDisabled(true);
+        _scheduleBtn->setChecked(false);
+        _scheduleBtn->setDisabled(false);
     }
-
-    return tabBarLayout;
 }
 
 void MainWidget::appConfig()
@@ -102,9 +90,9 @@ void MainWidget::appConfig()
     _standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir dir(_standardPath);
 
-    if ( !dir.exists() )
+    if (!dir.exists())
     {
-        if ( !dir.mkpath(_standardPath) )
+        if (!dir.mkpath(_standardPath))
         {
             return;
         }
@@ -112,15 +100,17 @@ void MainWidget::appConfig()
 
     _settings.beginGroup("/Settings");
 
-    _url = _settings.value("url", "").toString();
     _groupIndex = _settings.value("groupIndex", 0).toInt();
     _subgroup = _settings.value("subgroup", 1).toInt();
-    _date = _settings.value("date", QDateTime::currentDateTime().date() ).toDate();
+    _date = _settings.value("date", QDateTime::currentDateTime().date()).toDate();
     _week = _settings.value("week", 1).toInt();
     _showEmptyLessons = _settings.value("showEmptyLessons", false).toBool();
-    this->move( _settings.value("position", this->pos()).toPoint() );
-    this->resize( _settings.value("geometry", this->size()).toSize() );
-    this->resize( this->size() );
+    _currentTheme = _settings.value("theme", THEME_SYSTEM).toInt();
+
+
+    this->move(_settings.value("position", this->pos()).toPoint());
+    this->resize(_settings.value("geometry", this->size()).toSize());
+    this->resize(this->size());
 
     _settings.endGroup();
 
@@ -129,34 +119,20 @@ void MainWidget::appConfig()
 
 void MainWidget::saveSettingsFromTab()
 {
-    SettingsTab* settings = qobject_cast<SettingsTab*>( _mainLayout->itemAt(0)->widget() );
-
-    if (settings->getShowEmptyLessons() != _showEmptyLessons)
-    {
-        if (_showEmptyLessons)
-        {
-            this->setFixedHeight( this->height() - EXTRA_SIZE );
-        }
-        else
-        {
-            this->setFixedHeight( this->height() + EXTRA_SIZE );
-        }
-    }
+    SettingsTab* settings = qobject_cast<SettingsTab*>(_mainLayout->itemAt(0)->widget());
 
     _groupIndex = settings->getGroupIndex();
     _subgroup = settings->getSubgroup();
-
-    if (QDateTime::currentDateTime().date().dayOfWeek() == Qt::Sunday && settings->getWeek() == _currentWeekNumber)
-    {
-        _week = settings->getWeek() - 1;
-    }
-    else
-    {
-        _week = settings->getWeek();
-    }
-
-    _date = QDateTime::currentDateTime().date();
+    _week = settings->getWeek();
     _showEmptyLessons = settings->getShowEmptyLessons();
+
+    _settings.beginGroup("/Settings");
+    _settings.setValue("groupIndex", _groupIndex);
+    _settings.setValue("subgroup", _subgroup);
+    _settings.setValue("week", _week);
+    _settings.setValue("showEmptyLessons", _showEmptyLessons);
+    _settings.setValue("date", _date);
+    _settings.endGroup();
 
     calulateCurrentWeekNumber();
 }
@@ -166,11 +142,6 @@ void MainWidget::calulateCurrentWeekNumber()
     QDate currentDate = QDateTime::currentDateTime().date();
 
     _currentWeekNumber = currentDate.weekNumber() - _date.weekNumber() + _week;
-
-    if (currentDate.dayOfWeek() == 7)
-    {
-        ++_currentWeekNumber;
-    }
 
     if (_currentWeekNumber < 1 || _currentWeekNumber > MAX_WEEK_NUMBER)
     {
@@ -183,30 +154,25 @@ void MainWidget::closeEvent(QCloseEvent* event)
     if (_currentTabIndex == SETTINGS_TAB_INDEX)
     {
         this->saveSettingsFromTab();
-
-        Parser parser;
-        parser.readXLSX(_standardPath, _fileNameXLSX, _groupIndex);
-        parser.writeXML(_standardPath, _fileNameXML);
     }
 
     _settings.beginGroup("/Settings");
 
-    _settings.setValue("url", _url);
     _settings.setValue("groupIndex", _groupIndex);
     _settings.setValue("subgroup", _subgroup);
     _settings.setValue("showEmptyLessons", _showEmptyLessons);
     _settings.setValue("date", _date);
     _settings.setValue("week", _week);
-    _settings.setValue( "position", this->pos() );
+    _settings.setValue("theme", _currentTheme);
+    _settings.setValue("position", this->pos());
 
     if (_showEmptyLessons)
     {
-        this->setFixedHeight( this->height() - EXTRA_SIZE );
-        _settings.setValue( "geometry", this->size() );
+        _settings.setValue("geometry", this->size());
     }
     else
     {
-        _settings.setValue( "geometry", this->size() );
+        _settings.setValue("geometry", this->size());
     }
 
     _settings.endGroup();
@@ -214,104 +180,126 @@ void MainWidget::closeEvent(QCloseEvent* event)
 
 void MainWidget::slotScheduleButtonClicked()
 {
-    if ( _currentTabIndex == SCHEDULE_TAB_INDEX )
-    {
+    if (_currentTabIndex == SCHEDULE_TAB_INDEX) {
         return;
     }
 
-    this->saveSettingsFromTab();
-
-    Parser parser;
-
-    try
-    {
-        parser.readXLSX(_standardPath, _fileNameXLSX, _groupIndex);
-        parser.writeXML(_standardPath, _fileNameXML);
-    }
-    catch (...)
-    {}
-
-    _mainLayout->replaceWidget(_mainLayout->itemAt(0)->widget(), new ScheduleTab(
-            Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber), _showEmptyLessons, this))
-            ->widget()->deleteLater();
-
-    qobject_cast<settingsButton*>( _mainLayout->itemAt(1)->layout()->itemAt(SETTINGS_TAB_INDEX)->widget() )
-                                   ->setChecked(false);
-    qobject_cast<settingsButton*>( _mainLayout->itemAt(1)->layout()->itemAt(SETTINGS_TAB_INDEX)->widget() )
-                                   ->setDisabled(false);
-    qobject_cast<scheduleButton*>( _mainLayout->itemAt(1)->layout()->itemAt(SCHEDULE_TAB_INDEX)->widget() )
-                                   ->setDisabled(true);
-
-    _currentTabIndex = SCHEDULE_TAB_INDEX;
-}
-
-void MainWidget::slotSettingsButtonClicked()
-{
-    if (_currentTabIndex == SETTINGS_TAB_INDEX || _url.isEmpty() )
-    {
-        return;
-    }
-
-    Parser parser;
-    QStringList groups;
-    bool showGroups = true;
-
-    try
-    {
-        groups = Parser::groups(_standardPath, _fileNameXLSX);
-    }
-    catch (...)
-    {
-        showGroups = false;
-    }
-
-    SettingsTab* tab = new SettingsTab(groups, _groupIndex, _subgroup, _currentWeekNumber, MAX_WEEK_NUMBER,
-                                       _showEmptyLessons, this);
-
-    _mainLayout->replaceWidget(_mainLayout->itemAt(0)->widget(),
-                               new SettingsTab(groups, _groupIndex, _subgroup, _currentWeekNumber,
-                               MAX_WEEK_NUMBER, _showEmptyLessons, this, showGroups))->widget()->deleteLater();
-
-    qobject_cast<scheduleButton*>( _mainLayout->itemAt(1)->layout()->itemAt(SCHEDULE_TAB_INDEX)->widget() )
-                                   ->setChecked(false);
-    qobject_cast<scheduleButton*>( _mainLayout->itemAt(1)->layout()->itemAt(SCHEDULE_TAB_INDEX)->widget() )
-                                   ->setDisabled(false);
-    qobject_cast<settingsButton*>( _mainLayout->itemAt(1)->layout()->itemAt(SETTINGS_TAB_INDEX)->widget() )
-                                   ->setDisabled(true);
-
-    _currentTabIndex = SETTINGS_TAB_INDEX;
+    switchToSchedule();
 }
 
 void MainWidget::slotCheckSystemTheme()
 {
-    QColor backgroundColor = QWidget::palette().color( QWidget::backgroundRole() );
-
-    std::array<int, 3> color;
-    color[0] = backgroundColor.red();
-    color[1] = backgroundColor.green();
-    color[2] = backgroundColor.blue();
-
-    int count = 0;
-
-    for (auto&& item : color)
-    {
-        count += (item > 150) ? 1 : 0;
+    if (_currentTheme != THEME_SYSTEM) {
+        return;
     }
 
-    if ( count < 2 && (_appTheme == LIGHT_THEME || _appTheme == START_UP_THEME) )
+    QColor backgroundColor = QWidget::palette().color(QWidget::backgroundRole());
+
+
+    int brightness = (backgroundColor.red() + backgroundColor.green() + backgroundColor.blue()) / 3;
+
+
+    bool force = (_appTheme == START_UP_THEME);
+
+    if (brightness < 128 && (force || _appTheme == LIGHT_THEME))
     {
         QFile style(":/dark_theme.qss");
-        style.open(QFile::ReadOnly);
-
-        static_cast<QApplication*>( QCoreApplication::instance() )->setStyleSheet( style.readAll() );
-        _appTheme = DARK_THEME;
+        if (style.open(QFile::ReadOnly)) {
+            qApp->setStyleSheet(style.readAll());
+            _appTheme = DARK_THEME;
+        }
     }
-    else if ( count > 2 && (_appTheme == DARK_THEME || _appTheme == START_UP_THEME) )
+    else if (brightness >= 128 && (force || _appTheme == DARK_THEME))
     {
         QFile style(":/light_theme.qss");
-        style.open(QFile::ReadOnly);
-
-        static_cast<QApplication*>( QCoreApplication::instance() )->setStyleSheet( style.readAll() );
-        _appTheme = LIGHT_THEME;
+        if (style.open(QFile::ReadOnly)) {
+            qApp->setStyleSheet(style.readAll());
+            _appTheme = LIGHT_THEME;
+        }
     }
+}
+
+void MainWidget::setTheme(int themeIndex)
+{
+    _currentTheme = themeIndex;
+
+    switch (themeIndex) {
+    case THEME_LIGHT: {
+        QFile lightStyle(":/light_theme.qss");
+        if (lightStyle.open(QFile::ReadOnly)) {
+            qApp->setStyleSheet(lightStyle.readAll());
+            _appTheme = LIGHT_THEME;
+        }
+        break;
+    }
+    case THEME_DARK: {
+        QFile darkStyle(":/dark_theme.qss");
+        if (darkStyle.open(QFile::ReadOnly)) {
+            qApp->setStyleSheet(darkStyle.readAll());
+            _appTheme = DARK_THEME;
+        }
+        break;
+    }
+    case THEME_SYSTEM:
+    default: {
+        qApp->setStyleSheet("");
+        _appTheme = START_UP_THEME;
+        slotCheckSystemTheme();
+        break;
+    }
+    }
+}
+
+void MainWidget::switchToSchedule()
+{
+    if (_currentTabIndex == SCHEDULE_TAB_INDEX) return;
+    saveSettingsFromTab();
+
+    QWidget* oldWidget = _mainLayout->itemAt(0)->widget();
+    if (oldWidget) {
+        _mainLayout->removeWidget(oldWidget);
+        oldWidget->deleteLater();
+    }
+
+    auto schedule = Parser::readXML(_standardPath, _fileNameXML, _subgroup, _currentWeekNumber, _groupIndex);
+    ScheduleTab* scheduleTab = new ScheduleTab(schedule, _showEmptyLessons, this);
+    _mainLayout->insertWidget(0, scheduleTab);
+
+    _currentTabIndex = SCHEDULE_TAB_INDEX;
+    updateTabBarButtons();
+}
+
+void MainWidget::slotSettingsButtonClicked()
+{
+    if (_currentTabIndex == SETTINGS_TAB_INDEX) return;
+
+    QWidget* oldWidget = _mainLayout->itemAt(0)->widget();
+    if (oldWidget) {
+        _mainLayout->removeWidget(oldWidget);
+        oldWidget->deleteLater();
+    }
+
+    QStringList groups = Parser::groups(_standardPath, _fileNameXML);
+    bool showGroups = !groups.isEmpty();
+    SettingsTab* settingsTab = new SettingsTab(groups, _groupIndex, _subgroup, _currentWeekNumber,
+                                               MAX_WEEK_NUMBER, _showEmptyLessons, this, showGroups);
+
+    _mainLayout->insertWidget(0, settingsTab);
+
+    _currentTabIndex = SETTINGS_TAB_INDEX;
+    updateTabBarButtons();
+}
+
+void MainWidget::refreshSettingsTab()
+{
+    saveSettingsFromTab();
+    _currentTabIndex = -1;
+    slotSettingsButtonClicked();
+}
+
+void MainWidget::saveSetting(const QString& key, int value)
+{
+    _settings.beginGroup("/Settings");
+    _settings.setValue(key, value);
+    _settings.endGroup();
 }

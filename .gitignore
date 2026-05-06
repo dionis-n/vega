@@ -77,3 +77,13 @@ Thumbs.db
 *.dll
 *.exe
 
+# WebAssembly build output
+build/
+*.wasm
+*.html
+*.js
+qtloader.js
+qtlogo.svg
+
+# Qt Installer Framework
+Installer/

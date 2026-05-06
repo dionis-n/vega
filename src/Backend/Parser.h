@@ -1,39 +1,35 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <OpenXLSX.hpp>
-using namespace OpenXLSX;
-
 #include <QVector>
-#include <QString>
-#include <QFile>
-#include <QXmlStreamWriter>
-#include <QXmlStreamReader>
-#include <QDebug>
-
+#include <QStringList>
+#include <QByteArray>
+#include <QSettings>
 
 struct Lesson
 {
     int _number;
     QString _name;
     QString _cabinet;
+    int _subgroup = 0;
+    int _weekParity = 0;
+    QString _type;
+    QList<int> _weeks;
 };
 
-
-class Parser
-{
+class Parser {
 public:
-    Parser() = default;
+    void loadXLSXFromMemory(const QByteArray& data, int groupIndex);
+    void writeXML(const QString& directory, const QString& fileName);
 
-    void readXLSX(const QString& directory, const QString& fileNameXLSX, int groupIndex);
-    static QStringList groups(const QString& directory, const QString& fileNameXLSX);   // return all groups from file   
-    void writeXML(const QString& directory, const QString& fileNameXML);
-    static QVector<QVector<Lesson*>> readXML(const QString& directory, const QString& fileNameXML, int userSubgroup,
-                                             int userWeek);
+    static QVector<QVector<Lesson*>> readXML(const QString& directory, const QString& fileName,
+                                              int userSubgroup, int userWeek, int groupIndex = 0);
+    static QStringList groups(const QString& directory, const QString& fileName);
 
 private:
     QVector<QVector<Lesson*>> _rawSchedule;
+    QVector<QVector<QVector<Lesson*>>> _allGroupsSchedule;
+    QStringList _groups;
 };
 
-
-#endif // PARSER_H
+#endif
