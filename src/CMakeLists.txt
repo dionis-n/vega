@@ -46,6 +46,16 @@ target_link_libraries(Vega PRIVATE
     OpenXLSX::OpenXLSX
 )
 
+set_target_properties(Vega PROPERTIES
+    QT_WASM_EXTRA_HTML_INJECTIONS "<link rel='icon' href='Resources/VegaIcon/Vega.ico'>"
+)
+
+add_custom_command(TARGET Vega POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_SOURCE_DIR}/Resources/VegaIcon/Vega.ico"
+    "$<TARGET_FILE_DIR:Vega>/favicon.ico"
+)
+
 qt_finalize_executable(Vega)
 
 if(EMSCRIPTEN)

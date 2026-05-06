@@ -72,9 +72,12 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     {
         if (lesson -> _name != "НИР")
             time = _lessonTime[lesson->_number - 1];
+        else
+            time = "         \n         ";
     }
 
-    QLabel* timeLabel = new QLabel(time.trimmed());
+    //QLabel* timeLabel = new QLabel(time.trimmed());
+    QLabel* timeLabel = new QLabel(time);
     timeLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     timeLabel->setStyleSheet("font-size: 15px;");
@@ -109,8 +112,6 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
         nameLayout->addSpacing(10);
     }
     nameLayout->addWidget(nameLabel);
-    if (lesson->_name == "НИР")
-        nameLayout->setAlignment(Qt::AlignVCenter);
 
     // Кабинет
     QLabel* cabinetLabel = new QLabel(lesson->_cabinet);
