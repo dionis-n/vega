@@ -1,0 +1,40 @@
+{
+  "name": "Vega Schedule",
+  "short_name": "Vega",
+  "description": "Расписание занятий МИРЭА",
+  "id": "/Vega.html",
+  "start_url": "./Vega.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "Resources/VegaIcon/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "Resources/VegaIcon/Vega.ico",
+      "sizes": "256x256",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "Resources/VegaIcon/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Главный экран на телефоне"
+    },
+    {
+      "src": "Resources/VegaIcon/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Главный экран на ПК"
+    }
+  ]
+}
