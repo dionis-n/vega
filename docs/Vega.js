@@ -10846,7 +10846,7 @@ function checkIncomingModuleAPI() {
 }
 
 var ASM_CONSTS = {
-  9067044: () => {
+  9084020: () => {
     var link = document.createElement("link");
     link.rel = "manifest";
     link.href = "manifest.json";
@@ -10855,7 +10855,7 @@ var ASM_CONSTS = {
       navigator.serviceWorker.register("service-worker.js");
     }
   },
-  9067265: () => {
+  9084241: () => {
     Module.qtSuspendResumeControl = ({
       resume: null,
       asyncifyEnabled: false,
@@ -10864,7 +10864,7 @@ var ASM_CONSTS = {
       exclusiveEventHandler: 0
     });
   },
-  9067410: $0 => {
+  9084386: $0 => {
     function createNamedFunction(name, parent, obj) {
       return {
         [name]: function(...args) {

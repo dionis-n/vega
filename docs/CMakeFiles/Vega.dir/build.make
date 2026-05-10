@@ -67,6 +67,7 @@ qrc_Resources.cpp: C:\Users\ADMIN\Documents\vega\src\Resources\VegaIcon\service-
 qrc_Resources.cpp: C:\Users\ADMIN\Documents\vega\src\Resources\VegaIcon\icon-192.png
 qrc_Resources.cpp: C:\Users\ADMIN\Documents\vega\src\Resources\VegaIcon\screenshot-desktop.png
 qrc_Resources.cpp: C:\Users\ADMIN\Documents\vega\src\Resources\VegaIcon\screenshot-mobile.png
+qrc_Resources.cpp: C:\Users\ADMIN\Documents\vega\src\Resources\VegaIcon\icon-144.png
 qrc_Resources.cpp: C:\Users\ADMIN\Documents\vega\src\Resources\Icons\Light\settings_fill.svg
 qrc_Resources.cpp: C:\Users\ADMIN\Documents\vega\src\Resources\Icons\Light\settings.svg
 qrc_Resources.cpp: C:\Users\ADMIN\Documents\vega\src\Resources\Icons\Light\schedule_fill.svg
