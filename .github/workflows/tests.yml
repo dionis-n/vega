@@ -15,15 +15,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ParserHelpers использует только QString/QList/QRegularExpression,
-      # поэтому здесь хватает любого Qt 6.x с qtbase + qtsvg (нужен top-level find_package).
+      # ParserHelpers использует только QString/QList/QRegularExpression.
+      # Qt6::Svg в Qt 6.x уже входит в основной пакет qtbase, отдельный modules не нужен.
       - name: Install Qt 6
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.7.2'
           host: 'linux'
           target: 'desktop'
-          modules: 'qtsvg'
           cache: true
 
       - name: Configure CMake
