@@ -1,0 +1,38 @@
+name: tests
+
+on:
+  push:
+    branches: [master, wasm-port]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  parser-helpers:
+    name: ParserHelpers unit tests (Linux native)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ParserHelpers использует только QString/QList/QRegularExpression,
+      # поэтому здесь хватает любого Qt 6.x с qtbase + qtsvg (нужен top-level find_package).
+      - name: Install Qt 6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.2'
+          host: 'linux'
+          target: 'desktop'
+          modules: 'qtsvg'
+          cache: true
+
+      - name: Configure CMake
+        run: cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      # Собираем только тестовый таргет — без основного Vega-приложения и без либы OpenXLSX.
+      - name: Build VegaTests
+        run: cmake --build build --target VegaTests --parallel
+
+      - name: Run tests
+        working-directory: build
+        run: ctest --output-on-failure

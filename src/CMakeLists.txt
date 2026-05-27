@@ -15,6 +15,15 @@ qt_add_resources(SOURCES Resources.qrc)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Backend/OpenXLSX/)
 
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+enable_testing()
+
 set(PROJECT_SOURCES
     ${SOURCES}
     UI/main.cpp
@@ -30,6 +39,8 @@ set(PROJECT_SOURCES
     UI/CommonFunctions.h
     Backend/Parser.cpp
     Backend/Parser.h
+    Backend/ParserHelpers.cpp
+    Backend/ParserHelpers.h
 )
 
 qt_add_executable(Vega
@@ -47,11 +58,34 @@ set_target_properties(Vega PROPERTIES
     QT_WASM_INITIAL_MEMORY 256MB
 )
 
+qt_add_executable(VegaTests
+    Tests/test_parser.cpp
+    Backend/ParserHelpers.cpp
+    Backend/ParserHelpers.h
+)
+
+target_include_directories(VegaTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(VegaTests PRIVATE
+    GTest::gtest
+    Qt6::Core
+)
+
 if(EMSCRIPTEN)
     target_link_options(Vega PRIVATE -sNO_DISABLE_EXCEPTION_CATCHING)
+
+    # Тестам тоже нужен Embind и отключение «глотания» исключений, которые использует GTest.
+    target_link_options(VegaTests PRIVATE
+        --bind
+        -sNO_DISABLE_EXCEPTION_CATCHING
+    )
 endif()
 
 qt_finalize_executable(Vega)
+qt_finalize_executable(VegaTests)
+
+include(GoogleTest)
+gtest_discover_tests(VegaTests)
 
 add_custom_command(TARGET Vega POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/Resources/VegaIcon/Vega.ico" "$<TARGET_FILE_DIR:Vega>/favicon.ico"
