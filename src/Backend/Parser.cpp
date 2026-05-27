@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include "ParserHelpers.h"
 #include <OpenXLSX.hpp>
 #include <QFile>
 #include <QXmlStreamWriter>
@@ -10,32 +11,6 @@
 #include <algorithm>
 
 using namespace OpenXLSX;
-
-static const QRegularExpression reLecture(QStringLiteral(R"(\s*лк\s*)"));
-static const QRegularExpression reSpecificWeeks(QStringLiteral(R"((\d+(?:,\d+)*)\s*н\.?)"));
-
-static QString extractLessonType(const QString& raw) {
-    if (raw.contains(reLecture)) return "лк";
-    if (!raw.isEmpty()) return "пр";
-    return QString();
-}
-
-static QList<int> extractSpecificWeeks(const QString& raw) {
-    QList<int> weeks;
-    QRegularExpressionMatchIterator it = reSpecificWeeks.globalMatch(raw);
-    while (it.hasNext()) {
-        QRegularExpressionMatch match = it.next();
-        QStringList parts = match.captured(1).split(",");
-        for (const QString& p : parts) {
-            bool ok;
-            int w = p.trimmed().toInt(&ok);
-            if (ok && w >= 1 && w <= 20 && !weeks.contains(w))
-                weeks.append(w);
-        }
-    }
-    std::sort(weeks.begin(), weeks.end());
-    return weeks;
-}
 
 static QString getCellString(const XLCell& cell) {
     auto type = cell.value().type();
@@ -70,16 +45,6 @@ static QString getCellString(const XLCell& cell) {
     return QString();
 }
 
-static QString cleanSubjectName(const QString& raw) {
-    QString cleaned = raw;
-    cleaned.remove(QRegularExpression(R"(\s*\([12]пг\)\s*)"));
-    cleaned.remove(QRegularExpression(R"(\s*\([12]\*пг\)\s*)"));
-    cleaned.remove(QRegularExpression(R"(\s*[III]+\s*н\s*)"));
-    cleaned.remove(QRegularExpression(R"(\s*лк\s*)"));
-    cleaned.remove(reSpecificWeeks);
-    return cleaned.trimmed();
-}
-
 void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
 {
     _rawSchedule.clear();
@@ -97,12 +62,58 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
     auto wb = doc.workbook();
     auto ws = wb.worksheet("Занятия");
 
-    static const QRegularExpression hasCyrillic(QStringLiteral("[А-Яа-я]"));
-    for (int col = 3; col < 200; col += 3) {
-        QString g = getCellString(ws.cell(2, col)).trimmed();
-        if (g.isEmpty()) break;
-        if (!g.contains(hasCyrillic)) break;
+    // 1. Динамически ищем первую строку с расписанием (ищем 'ПН')
+    int dayStartRow = -1;
+    for (int row = 1; row <= 30; ++row) {
+        QString val = getCellString(ws.cell(row, 1)).trimmed().toUpper();
+        if (val == "ПН" || val == "ПОНЕДЕЛЬНИК") {
+            dayStartRow = row;
+            break;
+        }
+    }
+
+    if (dayStartRow == -1) {
+        qDebug() << "Ошибка: не найден день 'ПН'. Проверьте формат файла.";
+        doc.close();
+        return;
+    }
+
+    // 2. Ищем строку с группами (обычно она на 1-2 строки выше дней недели)
+    int groupRow = -1;
+    int groupColStart = -1;
+    static const QRegularExpression hasCyrillic(QStringLiteral("[А-Яа-яa-zA-Z]"));
+
+    for (int row = dayStartRow - 1; row >= 1; --row) {
+        // Проверяем 2, 3 и 4 колонки, чтобы точно зацепить начало
+        for (int col = 2; col <= 5; ++col) {
+            QString val = getCellString(ws.cell(row, col)).trimmed();
+            if (!val.isEmpty() && val.contains(hasCyrillic) && !val.contains("РАСПИСАНИЕ", Qt::CaseInsensitive)) {
+                groupRow = row;
+                groupColStart = col;
+                break;
+            }
+        }
+        if (groupRow != -1) break;
+    }
+
+    if (groupRow == -1 || groupColStart == -1) {
+        qDebug() << "Ошибка: не найдена строка с группами.";
+        doc.close();
+        return;
+    }
+
+    // 3. Парсим группы
+    for (int col = groupColStart; col < 200; col += 3) {
+        QString g = getCellString(ws.cell(groupRow, col)).trimmed();
+        if (g.isEmpty() || !g.contains(hasCyrillic)) break;
         _groups.append(g);
+    }
+
+    // КРИТИЧЕСКАЯ ЗАЩИТА: если групп нет, прерываем, иначе будет краш index out of range
+    if (_groups.isEmpty()) {
+        qDebug() << "Ошибка: список групп пуст. Парсинг прерван.";
+        doc.close();
+        return;
     }
 
     if (groupIndex < 0 || groupIndex >= _groups.size()) {
@@ -114,8 +125,9 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
         dayVec.resize(6);
     }
 
+    // 4. Основной цикл парсинга расписания
     for (int gIdx = 0; gIdx < _groups.size(); ++gIdx) {
-        int groupColumn = 3 + gIdx * 3;
+        int groupColumn = groupColStart + gIdx * 3;
 
         int currentDay = -1;
         int currentLessonNumber = 0;
@@ -126,15 +138,15 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
         static const QRegularExpression reEvenWeek(QStringLiteral(R"((^|\s)IIн)"));
         static const QRegularExpression reOddWeek(QStringLiteral(R"((^|\s)Iн)"));
 
-        for (int rowNum = 3; rowNum <= 100; ++rowNum) {
+        for (int rowNum = dayStartRow; rowNum <= 200; ++rowNum) {
             QString firstVal = getCellString(ws.cell(rowNum, 1)).trimmed();
 
             if (!firstVal.isEmpty()) {
-                if (firstVal.contains("Легенда")) {
+                if (firstVal.contains("Легенда", Qt::CaseInsensitive)) {
                     break;
                 }
                 for (int i = 0; i < dayNames.size(); ++i) {
-                    if (firstVal == dayNames[i]) {
+                    if (firstVal.toUpper() == dayNames[i]) {
                         currentDay = i;
                         currentLessonNumber = 0;
                         break;
@@ -142,19 +154,22 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
                 }
             }
 
-            if (currentDay < 0) {
+            if (currentDay < 0 || currentDay > 5) {
                 continue;
             }
 
             QString numStr = getCellString(ws.cell(rowNum, 2)).trimmed();
             if (!numStr.isEmpty()) {
                 int n = numStr.toInt();
-                if (n > 0 && n <= 7) {
+                if (n > 0 && n <= 8) {
                     currentLessonNumber = n;
-                } else {
-                    continue;
+                } else if (n == 0 && numStr != "0") {
+                    continue; // Защита от мусора в колонке с номерами пар
                 }
             }
+
+            if (currentDay == 5 && currentLessonNumber == 6)
+                break;
 
             if (currentLessonNumber == 0) {
                 continue;
@@ -165,10 +180,7 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
                 continue;
             }
 
-            if (currentDay == 5 && currentLessonNumber == 6)
-                break;
-
-            if (rawSubject.contains("Легенда") || rawSubject.contains("курс") ||
+            if (rawSubject.contains("Легенда", Qt::CaseInsensitive) || rawSubject.contains("курс") ||
                 rawSubject.contains("дистанционно") || rawSubject.contains("кампусе") ||
                 rawSubject.contains("Полигон") || rawSubject.contains("ФОК ") ||
                 rawSubject.contains("нечетные") || rawSubject.contains("четные") ||
@@ -184,11 +196,10 @@ void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
             if (rawSubject.contains(reEvenWeek))    weekParity = 2;
             else if (rawSubject.contains(reOddWeek)) weekParity = 1;
 
-            QList<int> specificWeeks = extractSpecificWeeks(rawSubject);
+            QList<int> specificWeeks = ParserDetail::extractSpecificWeeks(rawSubject);
+            QString lessonType = ParserDetail::extractLessonType(rawSubject);
+            QString cleanedSubject = ParserDetail::cleanSubjectName(rawSubject);
 
-            QString lessonType = extractLessonType(rawSubject);
-
-            QString cleanedSubject = cleanSubjectName(rawSubject);
             if (cleanedSubject.isEmpty() || cleanedSubject.length() < 2) {
                 continue;
             }
