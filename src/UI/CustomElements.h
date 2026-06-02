@@ -44,13 +44,5 @@ public:
     settingsButton(QWidget* parent = nullptr);
 };
 
-class lessonTypeBadge : public QLabel
-{
-    Q_OBJECT
-
-public:
-    explicit lessonTypeBadge(const QString& type, QWidget* parent = nullptr);
-};
-
 
 #endif
