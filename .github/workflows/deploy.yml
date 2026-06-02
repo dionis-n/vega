@@ -1,0 +1,116 @@
+name: deploy
+
+# Сборка WebAssembly-версии Vega прямо в CI и публикация на GitHub Pages.
+# Workflow сам собирает проект (Qt 6.11 for WebAssembly + Emscripten 4.0.7 —
+# та же связка, что и локально), забирает готовые Vega.html / Vega.js /
+# Vega.wasm, выкладывает их как скачиваемый артефакт и деплоит сайт на Pages.
+
+on:
+  push:
+    branches: [master, wasm-port]
+    paths:
+      - 'src/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Хостовый Qt нужен для инструментов сборки (moc/rcc/uic) — QT_HOST_PATH.
+      - name: Install host Qt (build tools)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.11.0'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'linux_gcc_64'
+          cache: true
+
+      - name: Remember host Qt path
+        run: echo "QT_HOST_PATH=$QT_ROOT_DIR" >> "$GITHUB_ENV"
+
+      - name: Install Qt for WebAssembly
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.11.0'
+          host: 'all_os'
+          target: 'wasm'
+          arch: 'wasm_singlethread'
+          cache: true
+
+      - name: Remember WebAssembly Qt path
+        run: echo "QT_WASM_ROOT=$QT_ROOT_DIR" >> "$GITHUB_ENV"
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 4.0.7
+
+      # Конфигурируем cmake напрямую с toolchain-файлом Qt (как локально),
+      # минуя обёртку qt-cmake (у неё в дистрибутиве нет флага +x).
+      - name: Configure (WASM, Release)
+        run: |
+          cmake -S src -B build -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$QT_WASM_ROOT/lib/cmake/Qt6/qt.toolchain.cmake" \
+            -DQT_HOST_PATH="$QT_HOST_PATH" \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Vega
+        run: cmake --build build --target Vega --parallel
+
+      # Собираем чистую папку сайта только из нужных артефактов
+      # (POST_BUILD уже скопировал PWA-ассеты и пропатчил HTML).
+      - name: Assemble site
+        run: |
+          mkdir -p site/Resources
+          cp build/Vega.html        site/index.html
+          cp build/Vega.html        site/
+          cp build/Vega.js          site/
+          cp build/Vega.wasm        site/
+          cp build/qtloader.js      site/ 2>/dev/null || true
+          cp build/qtlogo.svg       site/ 2>/dev/null || true
+          cp build/manifest.json    site/ 2>/dev/null || true
+          cp build/service-worker.js site/ 2>/dev/null || true
+          cp build/favicon.ico      site/ 2>/dev/null || true
+          cp -r build/Resources/*   site/Resources/ 2>/dev/null || true
+          echo "=== site contents ===" && ls -lR site
+
+      # Три файла сборки доступны как скачиваемый артефакт прогона.
+      - name: Upload build files (.html / .js / .wasm)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vega-wasm-build
+          path: |
+            build/Vega.html
+            build/Vega.js
+            build/Vega.wasm
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
