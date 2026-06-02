@@ -88,5 +88,10 @@ build/
 qtloader.js
 qtlogo.svg
 
+# Исходник service-worker.js нужен ресурсам приложения (Resources.qrc),
+# поэтому не игнорируем его, несмотря на правило *.js выше.
+!src/Resources/VegaIcon/service-worker.js
+!Resources/VegaIcon/service-worker.js
+
 # Qt Installer Framework
 Installer/
