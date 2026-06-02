@@ -15,6 +15,16 @@ qt_add_resources(SOURCES Resources.qrc)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Backend/OpenXLSX/)
 
+# OpenXLSX 0.3.2 местами использует uint16_t/uint64_t без явного <cstdint>.
+# Под emscripten/clang заголовок подтягивается транзитивно, а под нативным
+# GCC 13+ (в т.ч. в CI на ubuntu) сборка падает. Принудительно подключаем
+# <cstdint> во все единицы трансляции OpenXLSX, чтобы либа собиралась везде.
+if(MSVC)
+    target_compile_options(OpenXLSX PRIVATE /FIcstdint)
+else()
+    target_compile_options(OpenXLSX PRIVATE -include cstdint)
+endif()
+
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -62,13 +72,18 @@ qt_add_executable(VegaTests
     Tests/test_parser.cpp
     Backend/ParserHelpers.cpp
     Backend/ParserHelpers.h
+    Backend/Parser.cpp
+    Backend/Parser.h
 )
 
 target_include_directories(VegaTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Parser.cpp использует OpenXLSX, чтобы тесты могли прогоняться по реальному
+# .xlsx-расписанию, переданному через --schedule=<файл>.
 target_link_libraries(VegaTests PRIVATE
     GTest::gtest
     Qt6::Core
+    OpenXLSX::OpenXLSX
 )
 
 if(EMSCRIPTEN)

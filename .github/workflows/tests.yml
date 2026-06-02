@@ -28,10 +28,18 @@ jobs:
       - name: Configure CMake
         run: cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
-      # Собираем только тестовый таргет — без основного Vega-приложения и без либы OpenXLSX.
+      # Собираем только тестовый таргет (без основного Vega-приложения).
+      # VegaTests теперь линкует OpenXLSX, чтобы можно было прогонять парсер
+      # по реальному .xlsx-расписанию (см. шаг ниже).
       - name: Build VegaTests
         run: cmake --build build --target VegaTests --parallel
 
       - name: Run tests
         working-directory: build
         run: ctest --output-on-failure
+
+      # Прогон парсера по конкретному .xlsx-расписанию: проверяем разбор
+      # приложенного примера и валидируем результат.
+      - name: Run parser test against a sample schedule file
+        working-directory: build
+        run: ./VegaTests --schedule="$GITHUB_WORKSPACE/src/Tests/data/sample_schedule.xlsx"

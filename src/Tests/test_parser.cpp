@@ -1,13 +1,21 @@
 #include <gtest/gtest.h>
 #include <QString>
+#include <QStringList>
 #include <QList>
+#include <QFile>
 #include <iostream>
 
 #include "Backend/ParserHelpers.h"
+#include "Backend/Parser.h"
 
 using ParserDetail::extractLessonType;
 using ParserDetail::extractSpecificWeeks;
 using ParserDetail::cleanSubjectName;
+
+// Путь к .xlsx-файлу расписания, переданному при запуске теста.
+// Заполняется в main() из аргумента --schedule=<файл> или из переменной
+// окружения VEGA_SCHEDULE_FILE. Если пуст — файловый тест пропускается.
+static QString g_scheduleFile;
 
 TEST(ParserHelpersTest, ExtractLessonType)
 {
@@ -45,9 +53,105 @@ TEST(ParserHelpersTest, ExtractSpecificWeeks)
     EXPECT_TRUE(extractSpecificWeeks("Просто предмет без недель").isEmpty());
 }
 
+// Прогон парсера по реальному .xlsx-расписанию, заданному при запуске теста.
+// Без файла (например, в обычном CI) тест помечается как пропущенный, не падает.
+TEST(ScheduleFileTest, ParsesProvidedSchedule)
+{
+    if (g_scheduleFile.isEmpty())
+    {
+        GTEST_SKIP() << "Файл расписания не задан. Передайте --schedule=<файл.xlsx> "
+                        "или переменную окружения VEGA_SCHEDULE_FILE, чтобы прогнать "
+                        "тест по конкретному расписанию.";
+    }
+
+    ASSERT_TRUE(QFile::exists(g_scheduleFile))
+        << "Файл не найден: " << g_scheduleFile.toStdString();
+
+    Parser parser;
+    parser.loadXLSXFromFile(g_scheduleFile, 0);
+
+    const QStringList& groups = parser.parsedGroups();
+    ASSERT_FALSE(groups.isEmpty())
+        << "Не удалось разобрать ни одной группы. Проверьте, что в файле есть лист "
+           "'Занятия' и колонка с днями недели ('ПН').";
+
+    const QVector<QVector<QVector<Lesson*>>>& allGroups = parser.allGroupsSchedule();
+    ASSERT_EQ(allGroups.size(), groups.size());
+
+    const QStringList validTypes = {"лк", "пр", ""};
+
+    int totalLessons = 0;
+    for (int g = 0; g < allGroups.size(); ++g)
+    {
+        for (int day = 0; day < allGroups[g].size(); ++day)
+        {
+            for (const Lesson* lesson : allGroups[g][day])
+            {
+                ++totalLessons;
+
+                EXPECT_TRUE(validTypes.contains(lesson->_type))
+                    << "Недопустимый тип пары '" << lesson->_type.toStdString()
+                    << "' у предмета '" << lesson->_name.toStdString() << "'";
+
+                EXPECT_GE(lesson->_name.size(), 2)
+                    << "Слишком короткое название пары: '"
+                    << lesson->_name.toStdString() << "'";
+
+                EXPECT_GE(lesson->_number, 1) << "Номер пары вне диапазона 1..8";
+                EXPECT_LE(lesson->_number, 8) << "Номер пары вне диапазона 1..8";
+
+                for (int week : lesson->_weeks)
+                {
+                    EXPECT_GE(week, 1)  << "Номер недели вне диапазона 1..20";
+                    EXPECT_LE(week, 20) << "Номер недели вне диапазона 1..20";
+                }
+            }
+        }
+    }
+
+    EXPECT_GT(totalLessons, 0)
+        << "Группы найдены, но не разобрано ни одной пары.";
+
+    // Краткая сводка по разобранному файлу — удобно глазами проверить результат.
+    std::cout << "\n=== Разбор файла: " << g_scheduleFile.toStdString() << " ===\n";
+    std::cout << "Групп найдено: " << groups.size() << "\n";
+    for (const QString& gr : groups)
+        std::cout << "  - " << gr.toStdString() << "\n";
+    std::cout << "Всего пар (по всем группам): " << totalLessons << "\n";
+    std::cout << std::flush;
+}
+
+// Разбор аргумента --schedule=<файл> / --schedule <файл> и переменной окружения.
+static void parseScheduleArg(int argc, char** argv)
+{
+    for (int i = 1; i < argc; ++i)
+    {
+        const QString arg = QString::fromLocal8Bit(argv[i]);
+        if (arg.startsWith("--schedule="))
+        {
+            g_scheduleFile = arg.mid(QStringLiteral("--schedule=").size());
+        }
+        else if (arg == "--schedule" && i + 1 < argc)
+        {
+            g_scheduleFile = QString::fromLocal8Bit(argv[++i]);
+        }
+    }
+
+    if (g_scheduleFile.isEmpty())
+    {
+        g_scheduleFile = qEnvironmentVariable("VEGA_SCHEDULE_FILE");
+    }
+}
+
 // Свой main: под Node.js вывод теряется без явного flush перед exit.
 int main(int argc, char **argv) {
-    std::cout << "[WASM] Инициализация тестов..." << std::endl;
+    std::cout << "[Vega] Инициализация тестов..." << std::endl;
+
+    parseScheduleArg(argc, argv);
+    if (!g_scheduleFile.isEmpty())
+        std::cout << "[Vega] Файл расписания для теста: "
+                  << g_scheduleFile.toStdString() << std::endl;
+
     testing::InitGoogleTest(&argc, argv);
     int result = RUN_ALL_TESTS();
     std::cout << std::flush;
