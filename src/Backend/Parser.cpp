@@ -47,18 +47,26 @@ static QString getCellString(const XLCell& cell) {
 
 void Parser::loadXLSXFromMemory(const QByteArray& data, int groupIndex)
 {
-    _rawSchedule.clear();
-    _rawSchedule.resize(6);
-    _allGroupsSchedule.clear();
-    _groups.clear();
-
+    // В WebAssembly нет прямого доступа к файловой системе хоста, поэтому
+    // полученные из браузера байты кладём во временный файл виртуальной ФС
+    // (MEMFS), а затем переиспользуем общий парсер файла.
     FILE* f = fopen("/temp_schedule.xlsx", "wb");
     if (!f) { qDebug() << "Ошибка: не удалось создать виртуальный файл"; return; }
     fwrite(data.data(), 1, data.size(), f);
     fclose(f);
 
+    loadXLSXFromFile("/temp_schedule.xlsx", groupIndex);
+}
+
+void Parser::loadXLSXFromFile(const QString& path, int groupIndex)
+{
+    _rawSchedule.clear();
+    _rawSchedule.resize(6);
+    _allGroupsSchedule.clear();
+    _groups.clear();
+
     XLDocument doc;
-    doc.open("/temp_schedule.xlsx");
+    doc.open(path.toStdString());
     auto wb = doc.workbook();
     auto ws = wb.worksheet("Занятия");
 

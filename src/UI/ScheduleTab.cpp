@@ -83,35 +83,20 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
     timeLabel->setStyleSheet("font-size: 15px;");
     timeLabel->setMinimumWidth(0);
 
-    // Название
-    QLabel* nameLabel = new QLabel(lesson->_name);
+    // Название. Тип пары теперь отображается текстом, без цветного «кружка»:
+    // лекция — префикс «лк» перед названием, практика — ничего не добавляем.
+    QString displayName = lesson->_name;
+    if (lesson->_type == "лк" && !displayName.isEmpty())
+    {
+        displayName = "лк " + displayName;
+    }
+
+    QLabel* nameLabel = new QLabel(displayName);
     nameLabel->setWordWrap(true);
     nameLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     nameLabel->setStyleSheet("font-weight: bold;");
     nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     nameLabel->setMinimumWidth(0);
-
-    // Виджет типа пары
-    lessonTypeBadge* badge = nullptr;
-    if (!lesson->_type.isEmpty())
-    {
-        badge = new lessonTypeBadge(lesson->_type);
-    }
-
-    // Контейнер: виджет типа пары + название
-    QWidget* nameContainer = new QWidget();
-    nameContainer->setMinimumWidth(0);
-    QHBoxLayout* nameLayout = new QHBoxLayout(nameContainer);
-    nameLayout->setContentsMargins(0, 0, 0, 0);
-    nameLayout->setSpacing(0);
-
-    if (badge)
-    {
-
-        nameLayout->addWidget(badge, 0, Qt::AlignVCenter);
-        nameLayout->addSpacing(10);
-    }
-    nameLayout->addWidget(nameLabel);
 
     // Кабинет
     QLabel* cabinetLabel = new QLabel(lesson->_cabinet);
@@ -122,7 +107,7 @@ QWidget* ScheduleTab::createLessonRow(Lesson* lesson)
 
     rowLayout->addWidget(timeLabel, 0, Qt::AlignVCenter);
     rowLayout->addSpacing(10);
-    rowLayout->addWidget(nameContainer, 1);
+    rowLayout->addWidget(nameLabel, 1);
     rowLayout->addSpacing(8);
     rowLayout->addWidget(cabinetLabel, 0, Qt::AlignVCenter);
 
